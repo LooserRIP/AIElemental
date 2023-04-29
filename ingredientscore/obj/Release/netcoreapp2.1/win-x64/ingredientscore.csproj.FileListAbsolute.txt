@@ -1,0 +1,14 @@
+C:\Users\User\Documents\GitHub\AIElemental\ingredientscore\bin\Release\netcoreapp2.1\win-x64\hostpolicy.dll
+C:\Users\User\Documents\GitHub\AIElemental\ingredientscore\bin\Release\netcoreapp2.1\win-x64\hostfxr.dll
+C:\Users\User\Documents\GitHub\AIElemental\ingredientscore\bin\Release\netcoreapp2.1\win-x64\ingredientscore.exe
+C:\Users\User\Documents\GitHub\AIElemental\ingredientscore\bin\Release\netcoreapp2.1\win-x64\ingredientscore.deps.json
+C:\Users\User\Documents\GitHub\AIElemental\ingredientscore\bin\Release\netcoreapp2.1\win-x64\ingredientscore.runtimeconfig.json
+C:\Users\User\Documents\GitHub\AIElemental\ingredientscore\bin\Release\netcoreapp2.1\win-x64\ingredientscore.runtimeconfig.dev.json
+C:\Users\User\Documents\GitHub\AIElemental\ingredientscore\bin\Release\netcoreapp2.1\win-x64\ingredientscore.dll
+C:\Users\User\Documents\GitHub\AIElemental\ingredientscore\bin\Release\netcoreapp2.1\win-x64\ingredientscore.pdb
+C:\Users\User\Documents\GitHub\AIElemental\ingredientscore\obj\Release\netcoreapp2.1\win-x64\ingredientscore.csprojAssemblyReference.cache
+C:\Users\User\Documents\GitHub\AIElemental\ingredientscore\obj\Release\netcoreapp2.1\win-x64\ingredientscore.csproj.CoreCompileInputs.cache
+C:\Users\User\Documents\GitHub\AIElemental\ingredientscore\obj\Release\netcoreapp2.1\win-x64\ingredientscore.AssemblyInfoInputs.cache
+C:\Users\User\Documents\GitHub\AIElemental\ingredientscore\obj\Release\netcoreapp2.1\win-x64\ingredientscore.AssemblyInfo.cs
+C:\Users\User\Documents\GitHub\AIElemental\ingredientscore\obj\Release\netcoreapp2.1\win-x64\ingredientscore.dll
+C:\Users\User\Documents\GitHub\AIElemental\ingredientscore\obj\Release\netcoreapp2.1\win-x64\ingredientscore.pdb

@@ -1,0 +1,36 @@
+body {
+    background-color: #191919;
+    font-family: 'Roboto', sans-serif;
+    color: #FFFFFF;
+    overflow: hidden;
+    font-size: 110%;
+  }
+  h1 {
+    color: navy;
+    margin-left: 20px;
+  }
+  .element {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -o-user-select: none;
+    user-select: none;
+    width: 110px;
+    height: 110px;
+  
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .sidebar {
+    font-size: 150%;
+    display: inline-block;
+    float: right;
+    width: 350px;
+    height: 100%;
+    background-color: #101010;
+    overflow-y: scroll;
+    overflow-x: hidden;
+  }

@@ -51,8 +51,8 @@ def saveConfig():
     with open(config_path, 'w') as f:
         json.dump(config, f)
 
-stripped_list = ["solid black background, beautiful cartoonish art of " + item['name'] + " object" for item in config['elements']]
-with open("texturelist.json", 'w') as f:
+stripped_list = ["Tiny cute isometric " + item['name'] + ", soft smooth lighting, with soft colors, 100mm lens, 3d blender render, trending on polycount, modular constructivism, blue background, physically based rendering, centered." for item in config['elements']]
+with open("texturelist.json", 'w', encoding='utf-8') as f:
     #json.dump(stripped_list, f)
     f.write('\n'.join(stripped_list))
     
