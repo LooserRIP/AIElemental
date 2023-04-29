@@ -1,0 +1,11 @@
+C:\Users\User\Documents\GitHub\AIElemental\ingredientscore\bin\Debug\netcoreapp2.1\ingredientscore.deps.json
+C:\Users\User\Documents\GitHub\AIElemental\ingredientscore\bin\Debug\netcoreapp2.1\ingredientscore.runtimeconfig.json
+C:\Users\User\Documents\GitHub\AIElemental\ingredientscore\bin\Debug\netcoreapp2.1\ingredientscore.runtimeconfig.dev.json
+C:\Users\User\Documents\GitHub\AIElemental\ingredientscore\bin\Debug\netcoreapp2.1\ingredientscore.dll
+C:\Users\User\Documents\GitHub\AIElemental\ingredientscore\bin\Debug\netcoreapp2.1\ingredientscore.pdb
+C:\Users\User\Documents\GitHub\AIElemental\ingredientscore\obj\Debug\netcoreapp2.1\ingredientscore.csprojAssemblyReference.cache
+C:\Users\User\Documents\GitHub\AIElemental\ingredientscore\obj\Debug\netcoreapp2.1\ingredientscore.csproj.CoreCompileInputs.cache
+C:\Users\User\Documents\GitHub\AIElemental\ingredientscore\obj\Debug\netcoreapp2.1\ingredientscore.AssemblyInfoInputs.cache
+C:\Users\User\Documents\GitHub\AIElemental\ingredientscore\obj\Debug\netcoreapp2.1\ingredientscore.AssemblyInfo.cs
+C:\Users\User\Documents\GitHub\AIElemental\ingredientscore\obj\Debug\netcoreapp2.1\ingredientscore.dll
+C:\Users\User\Documents\GitHub\AIElemental\ingredientscore\obj\Debug\netcoreapp2.1\ingredientscore.pdb
