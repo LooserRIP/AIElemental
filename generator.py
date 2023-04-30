@@ -98,7 +98,7 @@ def check_text_verify(text):
         return False
     
 #print(os.environ.get('AIE_OPENAI_API_KEY'))
-webhook_url = os.environ.get('AIE_DISCORD')
+webhook_url = "https://discord.com/api/webhooks/999862915471507486/jsjm7KM7Mh_sc4Awmfge5vvTEQRqw6Qoq9ajbgonZl_McrnZ-YDeRG2VxU4tLzTi448D"
 openai.api_key = os.environ.get('AIE_OPENAI_API_KEY')
 config = []
 config_path = "database.json"
@@ -230,13 +230,13 @@ def addCombination(ing1, ing2):
 
 def generateRandomCombination():
     elementLength = min(len(config['elements']) - 1,9999999990)
-    elementLength = len(complexids) - 1
+    #elementLength = len(complexids) - 1
     recipesDict = config['recipes']
     while True:
-        #ing1 = random.randint(0, random.randint(0, random.randint(0, random.randint(0, random.randint(0, elementLength)))))
-        #ing2 = random.randint(0, random.randint(0, random.randint(0, random.randint(0, random.randint(0, elementLength)))))
-        ing1 = complexids[random.randint(random.randint(0, elementLength), elementLength)]
-        ing2 = complexids[random.randint(random.randint(0, elementLength), elementLength)]
+        ing1 = random.randint(0, elementLength)
+        ing2 = random.randint(0, elementLength)
+        #ing1 = complexids[random.randint(random.randint(0, elementLength), elementLength)]
+        #ing2 = complexids[random.randint(random.randint(0, elementLength), elementLength)]
         if ing1 > ing2:
             swap = ing1
             ing1 = ing2
@@ -249,7 +249,33 @@ def randomCombination():
     addCombination(comb[0], comb[1])
     return
 
-#randomCombination()
 while True:
     randomCombination()
     time.sleep(1.5)
+
+    
+
+while True:
+    user_input = input("Recipe: ")
+    ing1, ing2 = user_input.split('+')
+    find1 = find_element_index(config['elements'], striptext(ing1)) 
+    find2 = find_element_index(config['elements'], striptext(ing2))
+    if find1 > find2:
+        temp = find1
+        find1 = find2
+        find2 = temp
+    if find1 != -1 and find2 != -1 and f'{find1}.{find2}' not in config['recipes']:
+        addCombination(find1, find2)
+    else:
+        if f'{find1}.{find2}' in config['recipes']:
+            print(f"Recipe already exists and results in {config['elements'][config['recipes'][f'{find1}.{find2}']]['name']}!")
+        if find1 == -1 and find2 == -1:
+            print(f"{ing1} and {ing2} don't exist.")
+        elif find2 == -1:
+            print(f"{ing2} doesn't exist.")
+        elif find1 == -1:
+            print(f"{ing1} doesn't exist.")
+
+    
+
+#randomCombination()

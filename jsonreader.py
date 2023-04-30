@@ -37,8 +37,7 @@ def remove_special_chars(word):
         word = word[1:]
     return word
 
-        
-webhook_url = "https://discord.com/api/webhooks/999862915471507486/jsjm7KM7Mh_sc4Awmfge5vvTEQRqw6Qoq9ajbgonZl_McrnZ-YDeRG2VxU4tLzTi448D"
+
 config = []
 config_path = "database.json"
 try:
@@ -51,7 +50,7 @@ def saveConfig():
     with open(config_path, 'w') as f:
         json.dump(config, f)
 
-stripped_list = ["Tiny cute isometric " + item['name'] + ", soft smooth lighting, with soft colors, 100mm lens, 3d blender render, trending on polycount, modular constructivism, blue background, physically based rendering, centered." for item in config['elements']]
+stripped_list = ["icon of " + item['name'] + ", simple background, white background <lora:sxz-icons-v5:0.7>" for item in config['elements']]
 with open("texturelist.json", 'w', encoding='utf-8') as f:
     #json.dump(stripped_list, f)
     f.write('\n'.join(stripped_list))
