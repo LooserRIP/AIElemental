@@ -98,12 +98,13 @@ def check_text_verify(text):
         return False
     
 #print(os.environ.get('AIE_OPENAI_API_KEY'))
-webhook_url = "https://discord.com/api/webhooks/999862915471507486/jsjm7KM7Mh_sc4Awmfge5vvTEQRqw6Qoq9ajbgonZl_McrnZ-YDeRG2VxU4tLzTi448D"
+webhook_url = os.environ.get('AIE_DISCORD')
 openai.api_key = os.environ.get('AIE_OPENAI_API_KEY')
 config = []
 config_path = "database.json"
 verifyrecipes = True
 counterBackup = 0
+complexids = [3234,3418,3502,3580,3904,3987,4058,4096,3125,3432,3507,3641,3777,3863,3878,3920,3988,3399,3413,3695,3704,3715,3804,3830,3948,3963,3994,3343,3767,3872,3921,4004,4045,4061,4094,4095,3806,4012,4111,3457,3459,3588,3786,4017,3706,3772,3962,3115,3577,3684,3861,3971,3665,3768,3866,3925,4010,3910,3942,4029,4063,4108,3602,4001,4083,3134,3401,3945,3405,3710,3428,3712,3648,3785,3964]
 try:
     with open(config_path, 'r') as f:
         config = json.load(f)
@@ -160,6 +161,7 @@ def generateElementRecipe(ing1, ing2):
     #print(rawresponsemsg, f'{responsetokens} tokens')
     return rawresponsemsg
 def addElement(ing1, ing2, name, tp, desc):
+    complexids.append(len(config))
     strippedname = striptext(name)
     config['elements'].append({"name": name, "stripped": strippedname, "description": desc, "textureprompt" : tp})#, "recipe": [ing1,ing2].sort()}
     combstring = f"{ing1}.{ing2}"
@@ -227,15 +229,14 @@ def addCombination(ing1, ing2):
 
 
 def generateRandomCombination():
-    getnow = [0,1,2,3,4,5,6,7,8,9,14,769,10,11,12,13,15,16,18,20,21,23,24,28,30,32,49,79,330,565,17,19,22,25,26,29,31,33,34,36,37,42,46,50,51,53,55,56,60,69,82,85,93,111,126,152,154,199,265,328,427,678,692,740,860,1306,1893]
     elementLength = min(len(config['elements']) - 1,9999999990)
-    elementLength = len(getnow) - 1
+    elementLength = len(complexids) - 1
     recipesDict = config['recipes']
     while True:
         #ing1 = random.randint(0, random.randint(0, random.randint(0, random.randint(0, random.randint(0, elementLength)))))
         #ing2 = random.randint(0, random.randint(0, random.randint(0, random.randint(0, random.randint(0, elementLength)))))
-        ing1 = getnow[random.randint(0, random.randint(0, elementLength))]
-        ing2 = getnow[random.randint(0, random.randint(0, elementLength))]
+        ing1 = complexids[random.randint(random.randint(0, elementLength), elementLength)]
+        ing2 = complexids[random.randint(random.randint(0, elementLength), elementLength)]
         if ing1 > ing2:
             swap = ing1
             ing1 = ing2
