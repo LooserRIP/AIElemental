@@ -49,8 +49,9 @@ except (FileNotFoundError, json.JSONDecodeError):
 def saveConfig():
     with open(config_path, 'w') as f:
         json.dump(config, f)
-
-stripped_list = ["icon of " + item['name'] + ", simple background, white background <lora:sxz-icons-v5:0.7>" for item in config['elements']]
+        
+regex = re.compile('[^a-zA-Z0-9\s]')
+stripped_list = ["icon of " + regex.sub('', item['textureprompt']) + ", simple background, white background <lora:sxz-icons-v5:0.7>" for item in config['elements']]
 with open("texturelist.json", 'w', encoding='utf-8') as f:
     #json.dump(stripped_list, f)
     f.write('\n'.join(stripped_list))
