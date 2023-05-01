@@ -1,9 +1,20 @@
+:root {
+  --shade0: #170d1a;
+  --shade1: #30152f;
+  --shade2: #522546;
+  --shade3: #88304E;
+  --shade4: #E23E57;
+  --shade5: #e6e6e6;
+
+}
 body {
-    background-color: #191919;
-    font-family: 'Roboto', sans-serif;
-    color: #FFFFFF;
+    background-color: var(--shade0);
+    font-family: 'Quicksand', sans-serif;
+    color: var(--shade5);
     overflow: hidden;
     font-size: 110%;
+    margin: 0 0 0 0;
+    padding: 0 0 0 0;
   }
   h1 {
     color: navy;
@@ -28,9 +39,49 @@ body {
     font-size: 150%;
     display: inline-block;
     float: right;
-    width: 350px;
+    width: 300px;
     height: 100%;
-    background-color: #101010;
+    background-color: var(--shade1);
     overflow-y: scroll;
     overflow-x: hidden;
   }
+  .sidebarelement {
+    height: 100px;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .sidebarimage {
+    display: inline-block;
+    width: 100px;
+    height: 100px;
+    background-size: cover;
+  }
+  .sidebartext {
+    font-size: 25%;
+    text-size-adjust: 80%;
+  }
+  
+
+::-webkit-scrollbar {
+  width: 20px;
+}
+  
+  /* Track */
+::-webkit-scrollbar-track {
+  display: none;
+}
+   
+  /* Handle */
+::-webkit-scrollbar-thumb {
+  background: var(--shade2); 
+  border-radius: 10px;
+}
+  
+  /* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: var(--shade2); 
+}

@@ -6,21 +6,29 @@
 <style lang="en" type="text/css" id="dark-mode-native-sheet"></style>
 
 <head>
-    <title>LAUGC</title>
+    <title>LAGPT</title>
     <script src="sitefiles/script.js"></script>
-    <meta name="description" content="Elemental 3 Remake but you can draw element textures!">
+    <meta name="description" content="A remake of elemental made with stable diffusion and gpt-3.5.">
     <script src="https://cdn.rawgit.com/magicien/undo-canvas/v0.1.3/undo-canvas.js"></script>
     <link rel="stylesheet" href="sitefiles/style.css">
     <link rel="icon" type="image/png"
-        href="https://cdn.glitch.me/91003ce8-601f-479c-ad00-f8f400d22b15%2F2.jpg?v=1634572561412">
-    <link rel="stylesheet" href="https://derpystuff.gitlab.io/webstorage0/assets/X7fan35YsDZcbEWhRNATypP9.css">
+        href="C:\Users\koren\OneDrive\Documents\Github\AIElemental\cdn\IconsStyle\matter.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;300&amp;display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand&display=swap" rel="stylesheet">
 </head>
 
 <body onload="init()" class="vsc-initialized">
-    <div class="sidebar" id="sidebar"></div>
+    <div class="sidebar" id="sidebar">
+        <div class="sidebarelement" data-id="0">
+            <div class="sidebarimage" style="background-image: url('cdn/IconsStyle/water.png')"></div>
+            <p class="sidebartext">Water</p>
+        </div>
+        <div class="sidebarelement" data-id="0">
+            <div class="sidebarimage" style="background-image: url('cdn/IconsStyle/air.png')"></div>
+            <p class="sidebartext">Super Much Bigger Water</p>
+        </div>
+    </div>
     <div class="container" id="makearea">
     </div>
 
