@@ -55,11 +55,60 @@ function initbody() {
 function init() {
   console.log("Init");
   setInterval(loop, 5)
+  collection.forEach(collectioncheck => {
+    console.log(collectioncheck)
+    var res = database['recipes'][collectioncheck];
+    if (!collectionitems.includes(res)) {
+      collectionitems.push(res);
+    }
+  })
+  //collectionitems = collectionitems.sort((a, b) => a-b);
+  collectionitems.forEach(addToSidebar => {
+    sidebar_add(addToSidebar)
+  })
 }
 let distanceLerp = 0;
 let bringBack = [];
 let waitTimeCC = 0;
 let combining = null;
+let collection = [];
+let collectionitems = [0, 1, 2, 3];
+// Collection Management
+if (localStorage["lagpt_collection"] == undefined) {
+  localStorage["lagpt_collection"] = JSON.stringify([]);
+}
+collection = JSON.parse(localStorage["lagpt_collection"]);
+function collection_checkItem(id) {
+  return collectionitems.includes(id);
+}
+function collection_checkRecipe(ing1, ing2) {
+  if (ing1 > ing2) {
+    return collection.includes(ing2 + "." + ing1)
+  } else {
+    return collection.includes(ing1 + "." + ing2)
+  }
+  return false;
+}
+function collection_addRecipe(ing1, ing2) {
+  if (ing1 > ing2) {
+    collection.push(ing2 + "." + ing1)
+    if (!collectionitems.includes(database['recipes'][ing2 + "." + ing1])) collectionitems.push(database['recipes'][ing2 + "." + ing1])
+  } else {
+    collection.push(ing1 + "." + ing2)
+    if (!collectionitems.includes(database['recipes'][ing1 + "." + ing2])) collectionitems.push(database['recipes'][ing1 + "." + ing2])
+  }
+  localStorage["lagpt_collection"] = JSON.stringify(collection);
+}
+function sidebar_add(id) {
+  let addHtml = '<div class="sidebarimage" onmousedown="spawnside(this)" style="background-image: url(\'https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/' + database.elements[id].stripped + '.png\')"></div><span class="sidebartext">' + database.elements[id].name + '</span>';
+  let addElm = document.createElement("DIV");
+  addElm.dataset["id"] = id;
+  addElm.className = "sidebarelement";
+  addElm.innerHTML = addHtml;
+  if (database.elements[id].name.length > 12) addElm.childNodes[1].dataset['small'] = "1"
+  document.getElementById("sidebar").appendChild(addElm)
+}
+
 function loop() {
   if (currentlyDragging != null) {
     let viewportWidth  = document.documentElement.clientWidth;
@@ -100,8 +149,21 @@ function loop() {
     removeId = null;
   }
 }
+let discoveryMenu = null;
+function openDiscoveryMenu(id) {
+  discoveryMenu = id;
+  document.getElementById("newDiscovery").dataset["shown"] = "1";
+  document.getElementById("newDiscoveryTitle").innerText = database.elements[id].name;
+  document.getElementById("newDiscoveryDescription").innerText = "'" + database.elements[id].description + "'";
+  document.getElementById("newDiscoveryImage").style.backgroundImage = "url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/" + database.elements[id].stripped + ".png')";
+}
+function closeDiscoveryMenu() {
+  discoveryMenu = null;
+  document.getElementById("newDiscovery").dataset["shown"] = "0";
+}
+
 function spawnitem(id, posx, posy, smaller) {
-  let innerHtmlItem = '<div class="gamecircle"></div><div class="gameimage" style="background-image: url(\'cdn/IconsStyle/%1%.png\')"></div><div class="gamehitbox" onmouseover="hoverElement(this, true)" onmouseout="hoverElement(this, false)" onmousedown="gameElmPress(this)"></div>'
+  let innerHtmlItem = '<div class="gamecircle"></div><div class="gameimage" style="background-image: url(\'https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/%1%.png\')"></div><div class="gamehitbox" onmouseover="hoverElement(this, true)" onmouseout="hoverElement(this, false)" onmousedown="gameElmPress(this)"></div>'
   let htmlItem = document.createElement("DIV");
   htmlItem.className = "gameelement";
   htmlItem.dataset['id'] = id;
@@ -150,6 +212,7 @@ async function hoverElement(elm, status) {
     }
   }
 }
+
 async function combineGameElements(on, below) {
   combining = true;
   combineCircle.dataset["show"] = "0";
@@ -190,19 +253,53 @@ async function combineGameElements(on, below) {
       below.style.top = ((parseInt(below.style.top) * 0.85) + (interpolated.y * 0.15)) + "px";
       await sleep(4)
     }
+    on.remove();
+    below.remove();
     combining = false;
+    newDiscovery = !collection_checkItem(combinationResult);
+    newRecipe = !collection_checkRecipe(id1, id2);
+    itemIsFinal = (database.elements[combinationResult].potential == 0)
     let spitem = spawnitem(combinationResult, interpolated.x, interpolated.y, true);
+    if (!newDiscovery && newRecipe) {
+      sparks(spitem);
+    }
+    if (newRecipe) {
+      collection_addRecipe(id1, id2);
+    }
     await sleep(100)
     spitem.dataset["small"] = "0";
     spitem.dataset["newitem"] = "1";
     currentlyHovering = null;
-    
-    itemIsFinal = true;
-    if (itemIsFinal) {
-      await sleep(1500)
-      destroyElm(spitem, combinationResult)
+    if (newDiscovery) {
+      sidebar_add(combinationResult);
+      openDiscoveryMenu(combinationResult)
+      for (let iw = 0; iw < 500; iw++) {
+        await sleep(5);
+        if (discoveryMenu == null) {
+          break;
+        }
+      }
+      if (itemIsFinal) {
+        await sleep(700)
+        destroyElm(spitem, combinationResult)
+      }
+    } else {
+      if (itemIsFinal) {
+        await sleep(1500)
+        destroyElm(spitem, combinationResult)
+      }
     }
   }
+}
+async function sparks(elm) {
+  var partyElm = document.createElement("DIV");
+  partyElm.style.position = "absolute";
+  partyElm.style.left = (parseInt(elm.style.left) - 13) + "px";
+  partyElm.style.top = (parseInt(elm.style.top) - 8) + "px";
+  document.getElementById("gamecontainer").appendChild(partyElm)
+  party.sparkles(partyElm, {zIndex: -1});
+  await sleep(2000);
+  partyElm.remove()
 }
 function startDrag(elm, ignore) {
   if (currentlyDragging != null) stopDrag()
@@ -225,7 +322,7 @@ async function destroyElm(elm, final) {
   if (final != undefined) {
     elm.dataset["finalitem"] = "1";
     await sleep(200);
-    party.resolvableShapes["finalItem" + final] = `<img height="50px" width="50px" src="cdn\\IconsStyle\\` + database.elements[final].stripped + `.png"/>`;
+    party.resolvableShapes["finalItem" + final] = `<img height="50px" width="50px" src="https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/` + database.elements[final].stripped + `.png"/>`;
     //rectsrc = party.sources.rectSource([parseInt(elm.style.left), parseInt(elm.style.top)]);
     var partyElm = document.createElement("DIV");
     partyElm.style.position = "absolute";
@@ -275,6 +372,8 @@ async function destroyElm(elm, final) {
     
     await sleep(100);
     elm.remove();
+    await sleep(700);
+    partyElm.remove();
   } else {
     await sleep(2000);
     elm.remove();

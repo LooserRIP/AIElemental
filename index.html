@@ -16,36 +16,23 @@
         href="cdn\IconsStyle\matter.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Quicksand&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400&display=swap" rel="stylesheet">
 </head>
 
 <body onload="initbody()" class="vsc-initialized">
     <div class="sidebar" id="sidebar">
-        <div class="sidebarelement" data-id="0">
-            <div class="sidebarimage" onmousedown="spawnside(this)" style="background-image: url('cdn/IconsStyle/water.png')"></div>
-            <span class="sidebartext">Water</span>
-        </div>
-        <div class="sidebarelement" data-id="1">
-            <div class="sidebarimage" onmousedown="spawnside(this)" style="background-image: url('cdn/IconsStyle/earth.png')"></div>
-            <span class="sidebartext">Earth</span>
-        </div>
-        <div class="sidebarelement" data-id="2">
-            <div class="sidebarimage" onmousedown="spawnside(this)" style="background-image: url('cdn/IconsStyle/fire.png')"></div>
-            <span class="sidebartext">Fire</span>
-        </div>
-        <div class="sidebarelement" data-id="3">
-            <div class="sidebarimage" onmousedown="spawnside(this)" style="background-image: url('cdn/IconsStyle/air.png')"></div>
-            <span class="sidebartext">Air</span>
-        </div>
-        <div class="sidebarelement" data-id="4">
-            <div class="sidebarimage" onmousedown="spawnside(this)" style="background-image: url('cdn/IconsStyle/pottery.png')"></div>
-            <span class="sidebartext" data-small="1">pottery but name's longer</span>
-        </div>
     </div>
     <div class="gamecontainer" id="gamecontainer">
         <div class="combinecircle" id="combinecircle" style="left:-174px; top:-174px"></div>
     </div>
-
+    <div data-shown="1" id="newDiscovery" onmousedown="closeDiscoveryMenu()">
+        <p id="newDiscoveryTitle">Water</p>
+        <div id="newDiscoveryRays"></div>
+        <div id="newDiscoveryImage" style="background-image: url('cdn/IconsStyle/water.png')"></div>
+        <p id="newDiscoveryDescription">`A fluid force that shapes and sustains life, capable of both gentle flow and powerful destruction.`</p>
+    </div>
 </body>
 
 </html>
