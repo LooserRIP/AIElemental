@@ -106,12 +106,12 @@ verifyrecipes = True
 counterBackup = 0
 complexids = [3234,3418,3502,3580,3904,3987,4058,4096,3125,3432,3507,3641,3777,3863,3878,3920,3988,3399,3413,3695,3704,3715,3804,3830,3948,3963,3994,3343,3767,3872,3921,4004,4045,4061,4094,4095,3806,4012,4111,3457,3459,3588,3786,4017,3706,3772,3962,3115,3577,3684,3861,3971,3665,3768,3866,3925,4010,3910,3942,4029,4063,4108,3602,4001,4083,3134,3401,3945,3405,3710,3428,3712,3648,3785,3964]
 try:
-    with open(config_path, 'r') as f:
+    with open(config_path, 'r', encoding='utf-8') as f:
         config = json.load(f)
 except (FileNotFoundError, json.JSONDecodeError):
     print("No Database Found, Getting Backup")
     shutil.copy("database_backup.json", config_path)
-    with open(config_path, 'r') as f:
+    with open(config_path, 'r', encoding='utf-8') as f:
         print("Successful Backup Loaded")
         config = json.load(f)
     pass
@@ -124,6 +124,23 @@ def saveConfig():
         counterBackup = 0
         shutil.copy(config_path, "database_backup.json")
 
+idgc = 0;
+for icg in config['elements']:
+    potential = 0;
+    recipes = 0;
+    for recipesg in config['recipes']:
+        recipeGet = f".{recipesg}.";
+        if f".{idgc}." in recipeGet:
+            potential += 1;
+        if config['recipes'][recipesg] == idgc:
+            recipes += 1;
+    config['elements'][idgc]['potential'] = potential;
+    config['elements'][idgc]['recipes'] = recipes;
+    print(str(idgc) + ", "+ config['elements'][idgc]['name'])
+    idgc += 1;
+        
+        
+saveConfig()
 def verifyRecipe(ing1, ing2, name):
     if check_text_verify(name) or striptext(name).startswith("g "):
         send_webhook_message(webhook_url, f":closed_book: Cancelled **{comb1}** + **{comb2}** = **{name}**", 16741749, "Automatic cancellation due to the text being below 3 characters or containign no a-z characters", None)
@@ -249,9 +266,6 @@ def randomCombination():
     addCombination(comb[0], comb[1])
     return
 
-while True:
-    randomCombination()
-    time.sleep(1.5)
 
     
 
@@ -277,5 +291,8 @@ while True:
             print(f"{ing1} doesn't exist.")
 
     
+while True:
+    randomCombination()
+    time.sleep(1.5)
 
 #randomCombination()

@@ -1,10 +1,10 @@
 :root {
-  --shade0: #170d1a;
-  --shade1: #30152f;
-  --shade2: #522546;
-  --shade3: #88304E;
-  --shade4: #E23E57;
-  --shade5: #e6e6e6;
+  --shade0: #20112c;
+  --shade1: #381b4e;
+  --shade2: #631d76;
+  --shade3: #9e4770;
+  --shade4: #ff784f;
+  --shade5: #db9d47;
 
 }
 body {
@@ -19,6 +19,15 @@ body {
   h1 {
     color: navy;
     margin-left: 20px;
+  }
+  * {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -o-user-select: none;
+    user-select: none;
   }
   .element {
     -webkit-touch-callout: none;
@@ -37,16 +46,18 @@ body {
   }
   .sidebar {
     font-size: 150%;
-    display: inline-block;
     float: right;
     width: 300px;
     height: 100%;
     background-color: var(--shade1);
     overflow-y: scroll;
     overflow-x: hidden;
+    padding-left: 5px;
+    box-shadow: -10px 0 0 0 var(--shade0), -15px 0 0 0 var(--shade1)
   }
   .sidebarelement {
     height: 100px;
+    width: 100%;
     display: flex;
     align-items: center;
     flex-wrap: wrap;
@@ -59,29 +70,204 @@ body {
     width: 100px;
     height: 100px;
     background-size: cover;
+    cursor: pointer;
+    opacity: 1;
+    transform: scale(1);
+    transition: opacity 0.4s, transform 0.4s;
+  }
+  .sidebarimage[data-disappear="1"] {
+    opacity: 0;
+    transform: scale(0.5);
+    transition: none;
   }
   .sidebartext {
-    font-size: 25%;
-    text-size-adjust: 80%;
+    display: inline-block;
+    max-width: 100%;
+    white-space: nowrap;
+    text-align: justify;
+    text-overflow: ellipsis;
+    overflow: hidden;
+  } 
+  .sidebartext[data-small="1"] {
+    font-size: 50%;
+    font-weight:500;
+  }
+  /*
+  .gamecontainer {
+    display: flex;
+    flex-direction: column;
+  }*/
+  .combinecircle {
+    position: absolute;
+    pointer-events: none;
+    height: 348px;
+    width: 348px;
+    border-radius: 100%;
+    background-color: var(--shade1);
+    transform: scale(0);
+    transition: transform 0.3s;
+    z-index: unset;
+  }
+  .combinecircle[data-show="1"] {
+    transform: scale(1.25);
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+  .gameelement {
+    position: absolute;
+    pointer-events: none;
+  }
+  .gamecircle {
+    height: 100px;
+    width: 100px;
+    background-color: var(--shade1);
+    border-radius: 50%;
+    background-size: cover;
+    position: relative;
+    right: 50px;
+    bottom: 50px;
+    transform: scale(0);
+    pointer-events: none;
+    transition: transform 0.2s, background-color 0.2s;
+  }
+  .gameelement[data-hovered="1"] > .gamecircle {
+    transform: scale(2.5);
+  }
+  .gameelement[data-small="1"] > .gamecircle {
+    transform: scale(0);
+  }
+  .gameelement[data-small="2"] > .gamecircle {
+    transform: scale(0);
+  }
+  .gameelement[data-comb="1"] > .gamecircle {
+    transform: scale(2.5);
+    background-color: var(--shade2);
+  }
+  .gameelement[data-comba="2"] > .gamecircle {
+    transition: transform 0.3s, background-color 0.2s;
+    transform: scale(0);
+    background-color: var(--shade2);
+  }
+  .gameelement[data-newitem="1"] > .gamecircle::after {
+    animation: newdiscover 0.5s;
+  }
+  .gameimage {
+    height: 256px;
+    width: 256px;
+    background-size: cover;
+    position: relative;
+    bottom: 228px;
+    right: 128px;
+    transform: scale(1);
+    opacity: 1;
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    pointer-events: none;
+  }
+  .gameelement[data-failed="1"] > .gameimage {
+    animation: shake 0.18s;
+  }
+  .gameelement[data-comb="1"] > .gameimage {
+    z-index: 2;
+  }
+  .gameelement[data-comba="2"] > .gameimage {
+    z-index: 2;
+    transition: transform 0.2s;
+    transform: scale(0);
+  }
+  .gamehitbox {
+    width: 180px;
+    height: 180px;
+    position: relative;
+    bottom: 446px;
+    right: 88px;
+    cursor: pointer;
+    pointer-events: all;
+  }
+  .gamehitbox[data-disable="1"] {
+    cursor: unset;
+    pointer-events: none;
+  }
+  .gameelement[data-dragging="1"] > .gamehitbox {
+    cursor: unset;
+    pointer-events: none;
+  }
+  .gameelement[data-comba="2"] > .gamehitbox {
+    bottom: 2000px;
+    cursor: unset;
+    pointer-events: none;
+  }
+  .gameelement[data-small="1"] > .gameimage {
+    transform: scale(0.390625);
+  }
+  .gameelement[data-small="2"] > .gameimage {
+    transform: scale(0);
+    transition: transform 0.6s, opacity 0.2s;
+    opacity: 0;
+  }
+  .gameelement[data-small="2"][data-finalitem="1"] > .gameimage {
+    transform: scale(0);
+    transition: transform 0.3s, opacity 0.2s;
+    opacity: 1;
+  }
+  .gametext {
+    position: relative;
+    text-align: center;
   }
   
 
 ::-webkit-scrollbar {
   width: 20px;
 }
-  
-  /* Track */
 ::-webkit-scrollbar-track {
   display: none;
 }
-   
-  /* Handle */
 ::-webkit-scrollbar-thumb {
   background: var(--shade2); 
   border-radius: 10px;
 }
-  
-  /* Handle on hover */
 ::-webkit-scrollbar-thumb:hover {
   background: var(--shade2); 
+}
+
+@keyframes newdiscover {
+  0% {
+    width: 100px;
+    height: 100px;
+    background-color: var(--shade5);
+    outline: var(--shade4) solid 0px;
+    outline-offset: 0px;
+    transform: scale(1);
+    opacity: 1;
+  }
+  25% {
+  }
+  50% {
+    background-color: var(--shade5);
+    outline: var(--shade4) solid 5px;
+    outline-offset: 15px;
+    transform: scale(4);
+    opacity: 0.5;
+  }
+  75% {
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes shake {
+  0% {
+    transform: translate(0, 0);
+  }
+  25% {
+    transform: translate(-5px, 5px);
+  }
+  50% {
+    transform: translate(0, 0);
+  }
+  75% {
+    transform: translate(5px, -5px);
+  }
+  100% {
+    transform: translate(0, 0);
+  }
 }
