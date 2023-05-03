@@ -5,7 +5,15 @@
   --shade3: #9e4770;
   --shade4: #ff784f;
   --shade5: #db9d47;
+  --vh: 1vh;
 
+}
+.material-symbols-outlined {
+  font-variation-settings:
+  'FILL' 1,
+  'wght' 400,
+  'GRAD' 200,
+  'opsz' 48
 }
 body {
     background-color: var(--shade0);
@@ -132,6 +140,7 @@ body {
     transform: scale(0);
     pointer-events: none;
     transition: transform 0.2s, background-color 0.2s;
+    margin-top: 0%;
   }
   .gameelement[data-hovered="1"] > .gamecircle {
     transform: scale(2.5);
@@ -212,11 +221,154 @@ body {
     transition: transform 0.3s, opacity 0.2s;
     opacity: 1;
   }
+  .gameelement[data-small="2"][data-finalitem="2"] > .gameimage {
+    transform: scale(0);
+    transition: transform 0.5s, opacity 0.3s;
+    opacity: 0;
+  }
   .gametext {
     position: relative;
     text-align: center;
   }
   
+  .gamebuttons {
+    position: absolute;
+    top: 214px;
+    left: 52px;
+    transform: scale(4);
+  }
+  .gamebutton {
+    pointer-events: all;
+    cursor: pointer;
+    display: block;
+    color: var(--shade1);
+    font-size: 200%;
+    margin-bottom: 8px;
+    transition: color 0.1s;
+  }
+  .gamebutton:hover {
+    color: var(--shade5);
+  }
+
+  #gb_clean {
+    animation: none;
+  }
+  #gb_clean[data-clean="1"] {
+    animation: wiggle 2.5s infinite;
+  }
+  #gb_dict {
+    transform: scale(1);
+    transition: transform 0.13s;
+  }
+  #gb_dict:active {
+    transform: scale(0.9);
+  }
+
+  @keyframes wiggle {
+   0% { transform: rotate(0deg); }
+   5% { transform: rotate(15deg); }
+   15% { transform: rotate(-7deg); }
+   20% { transform: rotate(0deg); }
+   100% { transform: rotate(0deg); }
+  }
+
+
+
+.dictionary {
+  position: absolute;
+  width: min(1200px, 80%);
+  height: min(800px, 80%);
+  left: 50%;
+  top: 50%;
+  transform: translateX(-50%) translateY(-50%) scale(0.8);
+  pointer-events: none;
+  opacity: 0;
+  background-color: var(--shade1);
+  transition: transform 0.4s, opacity 0.4s, outline 0.4s, outline-offset 0.4s;
+  border-radius: 2%;
+  z-index: 8;
+  outline: var(--shade1) solid 0px;
+  outline-offset: 0px;
+}
+.dictionary[data-shown="1"] {
+  transform: translateX(-50%) translateY(-50%) scale(1);
+  opacity: 1;
+  pointer-events: all;
+  outline: var(--shade1) solid 4px;
+  outline-offset: 12px;
+}
+#dictionaryDisclaimer {
+  text-align: center;
+  font-size: 200%;
+}
+.dictionaryGradient {
+  text-align: center;
+  font-size: 200%;
+  width: 200px;
+  height: 20px;
+}
+.dictionaryContainer {
+  border-radius: 1%;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  margin-left: 8px;
+  margin-top: 8px;
+  height: calc(100% - 140px);
+  display: flex;
+  flex-wrap: wrap;
+  outline: var(--shade2) solid 2px;
+}
+.dictItem {
+  width: 128px;
+  height: 128px;
+  display: inline-block;
+  background-size: cover;
+  transition: transform 0.1s;
+  cursor: pointer;
+}
+.dictItem:hover {
+  transform: scale(1.2);
+}
+
+#menutitle {
+  position: absolute;
+  width: 75%;
+  left: 50%;
+  top: calc(50% - 700px);
+  transform: translateX(-50%) scale(0);
+  font-size: 600%;
+  font-weight: 600;
+  text-align: center;
+  transition: transform 0.75s, opacity 0.5s;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 7;
+}
+#menubg[data-shown="1"] > #menutitle {
+  transform: translateX(-50%) scale(1);
+  opacity: 1;
+}
+
+#circlebg {
+  position: absolute;
+  height: calc(200 * var(--vh));
+  width: calc(200 * var(--vh));
+  background-color: var(--shade0);
+  opacity: 0;
+  left: 50%;
+  top: 50%;
+  pointer-events: none;
+  transition: opacity 0.5s, transform 0.5s;
+  border-radius: 100%;
+  transform: translateX(-50%) translateY(-50%) scale(0.5);
+  z-index: 6;
+}
+#menubg[data-shown="1"] > #circlebg {
+  pointer-events: all;
+  opacity: 0.9;
+  transition: opacity 0.5s, transform 1s;
+  transform: translateX(-50%) translateY(-50%) scale(1.5);
+}
 
 #newDiscovery {
   position: absolute;
@@ -229,7 +381,7 @@ body {
 }
 #newDiscovery[data-shown="1"] {
   pointer-events: all;
-  opacity: 0.9;
+  opacity: 1;
 }
 #newDiscoveryTitle {
   position: absolute;
@@ -244,7 +396,7 @@ body {
   pointer-events: none;
 }
 #newDiscovery[data-shown="1"] > #newDiscoveryTitle {
-  top: calc(50% - 420px);
+  top: calc(50% - 450px);
   transform: translateX(-50%) scale(1);
 }
 #newDiscoveryDescription {
@@ -261,7 +413,7 @@ body {
   pointer-events: none;
 }
 #newDiscovery[data-shown="1"] > #newDiscoveryDescription {
-  top: calc(50% + 150px);
+  top: calc(50% + 180px);
   transform: translateX(-50%) scale(1);
 }
 #newDiscoveryImage {
@@ -287,13 +439,14 @@ body {
   background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/rays.svg');
   transform: translateX(-50%) translateY(-50%) scale(0);
   line-height: 0;
-  transition: opacity 1.2s;
+  transition: opacity 0.6s;
   animation: rotating 10s linear infinite;
   opacity: 0;
   pointer-events: none;
 }
 #newDiscovery[data-shown="1"] > #newDiscoveryRays {
   opacity: 0.5;
+  transition: opacity 1.2s;
   transform: translateX(-50%) translateY(-50%) scale(1);
   animation: rotating 10s linear infinite;
 }

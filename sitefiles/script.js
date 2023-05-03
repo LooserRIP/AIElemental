@@ -100,12 +100,14 @@ function collection_addRecipe(ing1, ing2) {
   localStorage["lagpt_collection"] = JSON.stringify(collection);
 }
 function sidebar_add(id) {
+  if (database.elements[id].potential == 0) return;
   let addHtml = '<div class="sidebarimage" onmousedown="spawnside(this)" style="background-image: url(\'https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/' + database.elements[id].stripped + '.png\')"></div><span class="sidebartext">' + database.elements[id].name + '</span>';
   let addElm = document.createElement("DIV");
   addElm.dataset["id"] = id;
   addElm.className = "sidebarelement";
   addElm.innerHTML = addHtml;
   if (database.elements[id].name.length > 12) addElm.childNodes[1].dataset['small'] = "1"
+  if (database.elements[id].name.length > 17) addElm.childNodes[1].dataset['small'] = "2"
   document.getElementById("sidebar").appendChild(addElm)
 }
 
@@ -319,6 +321,12 @@ function gameElmPress(elm) {
 async function destroyElm(elm, final) {
   elm.dataset["small"] = "2";
   elm.childNodes[2].dataset["disable"] = "1";
+  if (final == -1) {
+    elm.dataset["finalitem"] = "2";
+    await sleep(700);
+    elm.remove();
+    return;
+  }
   if (final != undefined) {
     elm.dataset["finalitem"] = "1";
     await sleep(200);
@@ -445,4 +453,32 @@ function getElementPosition(element) {
 }
 function consolelog(msg) {
   //console.log(msg)
+}
+
+async function gb_clean() {
+  if (document.getElementById("gb_clean").dataset["clean"] == "1") {
+    return;
+  }
+  document.getElementById("gb_clean").dataset["clean"] = "1";
+  var elms = document.getElementsByClassName("gameelement");
+  for (const elmr of elms) {
+    if (elmr.dataset.id != undefined) {
+      destroyElm(elmr, -1)
+    }
+  }
+  await sleep(600);
+  document.getElementById("gb_clean").dataset["clean"] = "0";
+}
+function gb_dict() {
+  openMenu("dictionary");
+}
+
+async function openMenu(id) {
+  document.getElementById("menubg").dataset["shown"] = "1";
+  document.getElementById(id).dataset["shown"] = "1";
+}
+
+function exitMenu() {
+  document.getElementById("menubg").dataset["shown"] = "0";
+  document.getElementById("dictionary").dataset["shown"] = "0";
 }
