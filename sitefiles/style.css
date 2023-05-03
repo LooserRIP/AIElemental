@@ -249,6 +249,22 @@ body {
   .gamebutton:hover {
     color: var(--shade5);
   }
+  .backButton {
+    pointer-events: all;
+    cursor: pointer;
+    display: block;
+    color: var(--shade3);
+    font-size: 200%;
+    margin-bottom: 8px;
+    transform: scale(2);
+    position: relative;
+    bottom: 595px;
+    left: 40px;
+    transition: color 0.1s;
+  }
+  .backButton:hover {
+    color: var(--shade5);
+  }
 
   #gb_clean {
     animation: none;
@@ -258,10 +274,10 @@ body {
   }
   #gb_dict {
     transform: scale(1);
-    transition: transform 0.13s;
+    transition: transform 0.13s, color 0.1s;
   }
   #gb_dict:active {
-    transform: scale(0.9);
+    transform: scale(0.8);
   }
 
   @keyframes wiggle {
@@ -274,56 +290,182 @@ body {
 
 
 
-.dictionary {
-  position: absolute;
-  width: min(1200px, 80%);
-  height: min(800px, 80%);
-  left: 50%;
-  top: 50%;
-  transform: translateX(-50%) translateY(-50%) scale(0.8);
-  pointer-events: none;
-  opacity: 0;
-  background-color: var(--shade1);
-  transition: transform 0.4s, opacity 0.4s, outline 0.4s, outline-offset 0.4s;
-  border-radius: 2%;
-  z-index: 8;
-  outline: var(--shade1) solid 0px;
-  outline-offset: 0px;
-}
-.dictionary[data-shown="1"] {
-  transform: translateX(-50%) translateY(-50%) scale(1);
-  opacity: 1;
-  pointer-events: all;
-  outline: var(--shade1) solid 4px;
-  outline-offset: 12px;
-}
+  .dictionary {
+    position: absolute;
+    width: min(1200px, 80%);
+    height: min(800px, 80%);
+    left: 50%;
+    top: 50%;
+    transform: translateX(-50%) translateY(-50%) scale(0.8);
+    pointer-events: none;
+    opacity: 0;
+    background-color: var(--shade1);
+    transition: transform 0.4s, opacity 0.4s, outline 0.4s, outline-offset 0.4s;
+    border-radius: 2%;
+    z-index: 8;
+    outline: var(--shade1) solid 0px;
+    outline-offset: 0px;
+  }
+  .dictionary[data-shown="1"] {
+    transform: translateX(-50%) translateY(-50%) scale(1);
+    opacity: 1;
+    pointer-events: all;
+    outline: var(--shade1) solid 4px;
+    outline-offset: 12px;
+  }
+  .iteminfo {
+    position: absolute;
+    width: min(600px, 80%);
+    height: min(800px, 80%);
+    left: 50%;
+    top: 50%;
+    transform: translateX(-50%) translateY(-50%) scale(0.8);
+    pointer-events: none;
+    opacity: 0;
+    background-color: var(--shade1);
+    transition: transform 0.4s, opacity 0.4s, outline 0.4s, outline-offset 0.4s;
+    border-radius: 2%;
+    z-index: 9;
+    outline: var(--shade1) solid 0px;
+    outline-offset: 0px;
+    overflow-y: scroll;
+    overflow-x: hidden;
+  }
+  .iteminfo[data-shown="1"] {
+    transform: translateX(-50%) translateY(-50%) scale(1);
+    opacity: 1;
+    pointer-events: all;
+    outline: var(--shade1) solid 4px;
+    outline-offset: 12px;
+  }
+  .uiinfoItem {
+    display: inline-block;
+    width: 256px;
+    height: 256px;
+    background-size: cover;
+    transition: transform 0.05s;
+  }
+  .iteminfoItemHolder {
+    display: flex;
+    /*justify-content: center; /* Align horizontal */
+    align-items: center; /* Align vertical */
+  }
+  .uiinfoDisclaimer {
+    text-align: center;
+    font-size: 200%;
+    text-overflow:clip;
+    white-space: nowrap;
+    font-weight: 600;
+    margin-bottom: 0;
+    padding: 0;
+  }
+  .uiinfoDescription {
+    width: calc(100% - 300px);
+    font-size: 130%;
+    display: inline-block;
+    text-align:center;
+    margin: 0;
+    padding: 0;
+  }
+  .iteminfoCollectionTitle {
+    margin-top: 90px;
+    text-align: center;
+    font-size: 200%;
+    text-overflow:clip;
+    white-space: nowrap;
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+  .iteminfoCombinations {
+    overflow-y: scroll;
+    overflow-x: hidden;
+    max-height: 320px;
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center; /* Align horizontal */
+    align-items:flex-start; /* Align vertical */
+  }
+  .iteminfoCombination {
+    vertical-align: top;
+    display: flex;
+    justify-content: center; /* Align horizontal */
+    align-items:flex-start; /* Align vertical */
+  }
+  .iteminfoCombinationItem {
+    vertical-align: top;
+    display: inline-block;
+  }
+  .iteminfoCombinationText {
+    vertical-align: top;
+    margin: 0;
+    padding: 0;
+    text-align: center;
+    font-size: 150%;
+    width: 128px;
+  }
+  .iteminfoCombination > .iteminfoCombinationText {
+    margin: 0;
+    padding: 0;
+    text-align: center;
+    font-size: 150%;
+    display: inline-block;
+    width: unset;
+    position: relative;
+    top: 128px;
+  }
+  .iteminfoCombinationImg {
+    vertical-align: top;
+    width: 128px;
+    height: 128px;
+    background-size: cover;
+  }
 #dictionaryDisclaimer {
   text-align: center;
   font-size: 200%;
+  text-overflow:clip;
+  white-space: nowrap;
 }
 .dictionaryGradient {
+  position: relative;
   text-align: center;
   font-size: 200%;
-  width: 200px;
-  height: 20px;
+  width: 100%;
+  height: 50px;
+  position: relative;
+  bottom: 100px;
+  background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/gradient.png');
+  background-size: contain;
+  pointer-events: none;
+}
+.dictionaryGradient[data-up] {
+  text-align: center;
+  font-size: 200%;
+  width: 100%;
+  height: 50px;
+  position: relative;
+  transform: scaleY(-1);
+  bottom: -7px;
+  background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/gradient.png');
+  background-size: contain;
+  z-index: 5;
 }
 .dictionaryContainer {
+  position: relative;
+  top: -50px;
   border-radius: 1%;
   overflow-y: scroll;
   overflow-x: hidden;
   margin-left: 8px;
   margin-top: 8px;
   height: calc(100% - 140px);
-  display: flex;
-  flex-wrap: wrap;
-  outline: var(--shade2) solid 2px;
 }
 .dictItem {
   width: 128px;
   height: 128px;
   display: inline-block;
   background-size: cover;
-  transition: transform 0.1s;
+  transition: transform 0.05s;
   cursor: pointer;
 }
 .dictItem:hover {
@@ -344,12 +486,12 @@ body {
   pointer-events: none;
   z-index: 7;
 }
-#menubg[data-shown="1"] > #menutitle {
+#menubg[data-shown] > #menutitle {
   transform: translateX(-50%) scale(1);
   opacity: 1;
 }
 
-#circlebg {
+.circlebg {
   position: absolute;
   height: calc(200 * var(--vh));
   width: calc(200 * var(--vh));
@@ -363,7 +505,16 @@ body {
   transform: translateX(-50%) translateY(-50%) scale(0.5);
   z-index: 6;
 }
-#menubg[data-shown="1"] > #circlebg {
+#circlebg2 {
+  z-index: 9;
+}
+#menubg[data-shown] > #circlebg {
+  pointer-events: all;
+  opacity: 0.9;
+  transition: opacity 0.5s, transform 1s;
+  transform: translateX(-50%) translateY(-50%) scale(1.5);
+}
+#menubg[data-shown="2"] > #circlebg2 {
   pointer-events: all;
   opacity: 0.9;
   transition: opacity 0.5s, transform 1s;
@@ -450,6 +601,35 @@ body {
   transform: translateX(-50%) translateY(-50%) scale(1);
   animation: rotating 10s linear infinite;
 }
+
+
+.hint {
+  position: absolute;
+  width: min(600px, 80%);
+  height: min(800px, 80%);
+  left: 50%;
+  top: 50%;
+  transform: translateX(-50%) translateY(-50%) scale(0.8);
+  pointer-events: none;
+  opacity: 0;
+  background-color: var(--shade1);
+  transition: transform 0.4s, opacity 0.4s, outline 0.4s, outline-offset 0.4s;
+  border-radius: 2%;
+  z-index: 9;
+  outline: var(--shade1) solid 0px;
+  outline-offset: 0px;
+  overflow-y: scroll;
+  overflow-x: hidden;
+}
+.hint[data-shown="1"] {
+  transform: translateX(-50%) translateY(-50%) scale(1);
+  opacity: 1;
+  pointer-events: all;
+  outline: var(--shade1) solid 4px;
+  outline-offset: 12px;
+}
+
+
 ::-webkit-scrollbar {
   width: 5px;
 }

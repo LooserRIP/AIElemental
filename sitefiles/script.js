@@ -5,6 +5,7 @@ const sleep = (milliseconds) => {
 }
 
 let database;
+let depths;
 let jsonLoaded = false;
 let bodyLoaded = false;
 let mousePosition = {x: 0, y: 0};
@@ -62,9 +63,11 @@ function init() {
       collectionitems.push(res);
     }
   })
+  const elements = [...database.elements].sort((a, b) => a.depth - b.depth);
+  depths = elements.map(element => database.elements.indexOf(element));
   //collectionitems = collectionitems.sort((a, b) => a-b);
   collectionitems.forEach(addToSidebar => {
-    sidebar_add(addToSidebar)
+    addNewItem(addToSidebar)
   })
 }
 let distanceLerp = 0;
@@ -99,7 +102,12 @@ function collection_addRecipe(ing1, ing2) {
   }
   localStorage["lagpt_collection"] = JSON.stringify(collection);
 }
-function sidebar_add(id) {
+function addNewItem(id) {
+  depths.splice(depths.indexOf(id), 1)
+  sidebar_add(id)
+  dict_add(id);
+}
+function sidebar_add(id){
   if (database.elements[id].potential == 0) return;
   let addHtml = '<div class="sidebarimage" onmousedown="spawnside(this)" style="background-image: url(\'https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/' + database.elements[id].stripped + '.png\')"></div><span class="sidebartext">' + database.elements[id].name + '</span>';
   let addElm = document.createElement("DIV");
@@ -109,6 +117,15 @@ function sidebar_add(id) {
   if (database.elements[id].name.length > 12) addElm.childNodes[1].dataset['small'] = "1"
   if (database.elements[id].name.length > 17) addElm.childNodes[1].dataset['small'] = "2"
   document.getElementById("sidebar").appendChild(addElm)
+}
+function dict_add(id) {
+  let addElm = document.createElement("DIV");
+  addElm.onmousedown = function() {
+    openDict(id);
+  };
+  addElm.className = "dictItem";
+  addElm.style.backgroundImage = "url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/" + database.elements[id].stripped + ".png')";
+  document.getElementById("dictionaryContainer").appendChild(addElm)
 }
 
 function loop() {
@@ -230,7 +247,7 @@ async function combineGameElements(on, below) {
   console.log("COMBINE!", id1, id2)
   let combinationResult = database['recipes'][id1 + '.' + id2];
   console.log(combinationResult);
-  if (combinationResult == 4) combinationResult = undefined;
+  //if (combinationResult == 4) combinationResult = undefined;
   if (combinationResult == undefined) {
     on.dataset["comba"] = "0";
     on.dataset["comb"] = "0";
@@ -273,7 +290,7 @@ async function combineGameElements(on, below) {
     spitem.dataset["newitem"] = "1";
     currentlyHovering = null;
     if (newDiscovery) {
-      sidebar_add(combinationResult);
+      addNewItem(combinationResult);
       openDiscoveryMenu(combinationResult)
       for (let iw = 0; iw < 500; iw++) {
         await sleep(5);
@@ -470,15 +487,99 @@ async function gb_clean() {
   document.getElementById("gb_clean").dataset["clean"] = "0";
 }
 function gb_dict() {
+
+  document.getElementById('dictionaryDisclaimer').innerText = "You have found " + collectionitems.length + "/8211 items and " + collection.length + "/20262 recipes."
   openMenu("dictionary");
 }
 
+function openDict(id) {
+  console.log("clicked" + id)
+  if (openedMenu.includes("iteminfo")) exitMenu()
+  document.getElementById("iteminfoItem").style.backgroundImage = "url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/" + database.elements[id].stripped + ".png')";
+  document.getElementById("iteminfoDisclaimer").innerText = database.elements[id].name;
+  document.getElementById("iteminfoDescription").innerText = database.elements[id].description;
+  document.getElementById("iteminfoCombinations").innerHTML = "";
+  document.getElementById("iteminfoPotentials").innerHTML = "";
+  var collectionCounter = 0;
+  var potentialCounter = 0;
+  collection.forEach(colladd => {
+    let collsplit = colladd.split(".").map(Number);
+    if (database.recipes[colladd] == id) {
+      let infocombelm = document.createElement("div");
+      infocombelm.className = "iteminfoCombination";
+      var innercomb = '<div class="iteminfoCombinationItem"><div class="iteminfoCombinationImg" onclick="openDict(' + collsplit[0] + ')" style="background-image: url(\'https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/' + database.elements[collsplit[0]].stripped +'.png\')"></div><p class="iteminfoCombinationText">' + database.elements[collsplit[0]].name + '</p></div><p class="iteminfoCombinationText">+</p><div class="iteminfoCombinationItem"><div class="iteminfoCombinationImg" onclick="openDict(' + collsplit[1] + ')" style="background-image: url(\'https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/' + database.elements[collsplit[1]].stripped + '.png\')"></div><p class="iteminfoCombinationText">' + database.elements[collsplit[1]].name + '</p></div><p class="iteminfoCombinationText">=</p><div class="iteminfoCombinationItem"><div class="iteminfoCombinationImg" style="background-image: url(\'https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/' + database.elements[id].stripped + '.png\')"></div><p class="iteminfoCombinationText">' + database.elements[id].name + '</p></div>'
+      console.log(innercomb)
+      infocombelm.innerHTML = innercomb;
+      document.getElementById("iteminfoCombinations").appendChild(infocombelm);
+      collectionCounter += 1;
+    }
+    if (collsplit[0] == id || collsplit[1] == id) {
+      if (collsplit[1] == id) {
+        var tempswitch = collsplit[0];
+        collsplit[0] = collsplit[1];
+        collsplit[1] = tempswitch;
+      }
+      let infocombelm = document.createElement("div");
+      infocombelm.className = "iteminfoCombination";
+      var innercomb = '<div class="iteminfoCombinationItem"><div class="iteminfoCombinationImg" onclick="openDict(' + collsplit[0] + ')" style="background-image: url(\'https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/' + database.elements[collsplit[0]].stripped +'.png\')"></div><p class="iteminfoCombinationText">' + database.elements[collsplit[0]].name + '</p></div><p class="iteminfoCombinationText">+</p><div class="iteminfoCombinationItem"><div class="iteminfoCombinationImg" onclick="openDict(' + collsplit[1] + ')" style="background-image: url(\'https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/' + database.elements[collsplit[1]].stripped + '.png\')"></div><p class="iteminfoCombinationText">' + database.elements[collsplit[1]].name + '</p></div><p class="iteminfoCombinationText">=</p><div class="iteminfoCombinationItem"><div class="iteminfoCombinationImg" onclick="openDict(' + database.recipes[colladd] + ')" style="background-image: url(\'https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/' + database.elements[database.recipes[colladd]].stripped + '.png\')"></div><p class="iteminfoCombinationText">' + database.elements[database.recipes[colladd]].name + '</p></div>'
+      console.log(innercomb)
+      infocombelm.innerHTML = innercomb;
+      document.getElementById("iteminfoPotentials").appendChild(infocombelm);
+      potentialCounter += 1;
+    }
+  })
+  document.getElementById("iteminfoCombination").innerText = "Combinations (" + collectionCounter + "/" + database.elements[id].recipes + ")";
+  document.getElementById("iteminfoPotential").innerText = "Potential (" + potentialCounter + "/" + database.elements[id].potential + ")";
+  if (database.elements[id].potential == 0) {
+    document.getElementById("iteminfoPotential").innerText = "Final Item";
+  }
+  openMenu("iteminfo");
+}
+let openedMenu = [];
 async function openMenu(id) {
-  document.getElementById("menubg").dataset["shown"] = "1";
+  if (id == "dictionary") {
+    document.getElementById("menutitle").innerText = "Collection";
+  }
+  if (id == "hint") {
+    document.getElementById("menutitle").innerText = "Hint";
+  }
+  openedMenu.push(id);
+  document.getElementById("menubg").dataset["shown"] = openedMenu.length;
   document.getElementById(id).dataset["shown"] = "1";
 }
 
 function exitMenu() {
-  document.getElementById("menubg").dataset["shown"] = "0";
-  document.getElementById("dictionary").dataset["shown"] = "0";
+  if (openedMenu.length > 0) {
+    popped = openedMenu.pop();
+    document.getElementById("menubg").dataset["shown"] = openedMenu.length;
+    if (openedMenu.length == 0) delete document.getElementById("menubg").dataset["shown"];
+    document.getElementById(popped).dataset["shown"] = "0";
+  }
+}
+function gb_hint() {
+  openHint(depths[biasedRandomNumber(8, depths.length - 1)]);
+}
+function openHint(id) {
+  if (id < 4) return;
+  console.log(id, database.elements[id].name);
+  if (openedMenu.includes("hint")) exitMenu()
+  document.getElementById("hintItem").style.backgroundImage = "url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/" + database.elements[id].stripped + ".png')";
+  document.getElementById("hintDisclaimer").innerText = database.elements[id].name;
+  document.getElementById("hintDescription").innerText = database.elements[id].description;
+  let collsplit = database.elements[id].discovered;
+  if (collsplit.length == 1) collsplit.push(collsplit[0]);
+  console.log(collsplit)
+  let infocombelm = document.createElement("div");
+  infocombelm.className = "iteminfoCombination";
+  console.log(database.elements[collsplit[0]]);
+  var innercomb = '<div class="iteminfoCombinationItem"><div class="iteminfoCombinationImg" onclick="openHint(' + collsplit[0] + ')" style="background-image: url(\'https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/' + database.elements[collsplit[0]].stripped +'.png\')"></div><p class="iteminfoCombinationText">' + database.elements[collsplit[0]].name + '</p></div><p class="iteminfoCombinationText">+</p><div class="iteminfoCombinationItem"><div class="iteminfoCombinationImg" onclick="openHint(' + collsplit[1] + ')" style="background-image: url(\'https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/' + database.elements[collsplit[1]].stripped + '.png\')"></div><p class="iteminfoCombinationText">' + database.elements[collsplit[1]].name + '</p></div><p class="iteminfoCombinationText">=</p><div class="iteminfoCombinationItem"><div class="iteminfoCombinationImg" style="background-image: url(\'https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/' + database.elements[id].stripped + '.png\')"></div><p class="iteminfoCombinationText">' + database.elements[id].name + '</p></div>'
+  console.log(innercomb)
+  infocombelm.innerHTML = innercomb;
+  document.getElementById("hintComb").innerHTML = "";
+  document.getElementById("hintComb").appendChild(infocombelm);
+  openMenu("hint");
+}
+function biasedRandomNumber(power, max) {
+  const rand = Math.random();
+  return Math.floor(Math.pow(rand, power) * max);
 }

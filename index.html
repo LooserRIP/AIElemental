@@ -43,8 +43,9 @@
         <div class="combinecircle" id="combinecircle" style="left:-174px; top:-174px"></div>
     </div>
     <div id="menubg">
-        <div id="circlebg" onmousedown="exitMenu()"></div>
-        <p id="menutitle">Dictionary</p>
+        <div class="circlebg" id="circlebg" onmousedown="exitMenu()"></div>
+        <div class="circlebg" id="circlebg2" onmousedown="exitMenu()"></div>
+        <p id="menutitle">Collection</p>
     </div>
     <div data-shown="0" id="newDiscovery" onmousedown="closeDiscoveryMenu()">
         <p id="newDiscoveryTitle">Water</p>
@@ -53,122 +54,82 @@
         <p id="newDiscoveryDescription">`A fluid force that shapes and sustains life, capable of both gentle flow and powerful destruction.`</p>
     </div>
     <div class="dictionary" id="dictionary">
-        <p id="dictionaryDisclaimer">You have found 18/8211 items.</p>
-        <div class="dictionaryContainer">
-            <div class="dictItem" onmousedown="openDict(0)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/water.png')"></div>
-            <div class="dictItem" onmousedown="openDict(1)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/earth.png')"></div>
-            <div class="dictItem" onmousedown="openDict(2)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/fire.png')"></div>
-            <div class="dictItem" onmousedown="openDict(3)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/air.png')"></div>
-            <div class="dictItem" onmousedown="openDict(4)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/mist.png')"></div>
-            <div class="dictItem" onmousedown="openDict(5)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/water.png')"></div>
-            <div class="dictItem" onmousedown="openDict(6)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/water.png')"></div>
-            <div class="dictItem" onmousedown="openDict(7)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/water.png')"></div>
-            <div class="dictItem" onmousedown="openDict(0)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/water.png')"></div>
-            <div class="dictItem" onmousedown="openDict(1)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/earth.png')"></div>
-            <div class="dictItem" onmousedown="openDict(2)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/fire.png')"></div>
-            <div class="dictItem" onmousedown="openDict(3)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/air.png')"></div>
-            <div class="dictItem" onmousedown="openDict(4)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/mist.png')"></div>
-            <div class="dictItem" onmousedown="openDict(5)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/water.png')"></div>
-            <div class="dictItem" onmousedown="openDict(6)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/water.png')"></div>
-            <div class="dictItem" onmousedown="openDict(7)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/water.png')"></div>
-            <div class="dictItem" onmousedown="openDict(0)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/water.png')"></div>
-            <div class="dictItem" onmousedown="openDict(1)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/earth.png')"></div>
-            <div class="dictItem" onmousedown="openDict(2)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/fire.png')"></div>
-            <div class="dictItem" onmousedown="openDict(3)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/air.png')"></div>
-            <div class="dictItem" onmousedown="openDict(4)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/mist.png')"></div>
-            <div class="dictItem" onmousedown="openDict(5)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/water.png')"></div>
-            <div class="dictItem" onmousedown="openDict(6)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/water.png')"></div>
-            <div class="dictItem" onmousedown="openDict(7)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/water.png')"></div>
-            <div class="dictItem" onmousedown="openDict(0)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/water.png')"></div>
-            <div class="dictItem" onmousedown="openDict(1)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/earth.png')"></div>
-            <div class="dictItem" onmousedown="openDict(2)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/fire.png')"></div>
-            <div class="dictItem" onmousedown="openDict(3)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/air.png')"></div>
-            <div class="dictItem" onmousedown="openDict(4)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/mist.png')"></div>
-            <div class="dictItem" onmousedown="openDict(5)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/water.png')"></div>
-            <div class="dictItem" onmousedown="openDict(6)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/water.png')"></div>
-            <div class="dictItem" onmousedown="openDict(7)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/water.png')"></div>
-            <div class="dictItem" onmousedown="openDict(0)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/water.png')"></div>
-            <div class="dictItem" onmousedown="openDict(1)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/earth.png')"></div>
-            <div class="dictItem" onmousedown="openDict(2)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/fire.png')"></div>
-            <div class="dictItem" onmousedown="openDict(3)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/air.png')"></div>
-            <div class="dictItem" onmousedown="openDict(4)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/mist.png')"></div>
-            <div class="dictItem" onmousedown="openDict(5)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/water.png')"></div>
-            <div class="dictItem" onmousedown="openDict(6)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/water.png')"></div>
-            <div class="dictItem" onmousedown="openDict(7)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/water.png')"></div>
-            <div class="dictItem" onmousedown="openDict(0)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/water.png')"></div>
-            <div class="dictItem" onmousedown="openDict(1)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/earth.png')"></div>
-            <div class="dictItem" onmousedown="openDict(2)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/fire.png')"></div>
-            <div class="dictItem" onmousedown="openDict(3)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/air.png')"></div>
-            <div class="dictItem" onmousedown="openDict(4)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/mist.png')"></div>
-            <div class="dictItem" onmousedown="openDict(5)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/water.png')"></div>
-            <div class="dictItem" onmousedown="openDict(6)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/water.png')"></div>
-            <div class="dictItem" onmousedown="openDict(7)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/water.png')"></div>
-            <div class="dictItem" onmousedown="openDict(0)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/water.png')"></div>
-            <div class="dictItem" onmousedown="openDict(1)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/earth.png')"></div>
-            <div class="dictItem" onmousedown="openDict(2)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/fire.png')"></div>
-            <div class="dictItem" onmousedown="openDict(3)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/air.png')"></div>
-            <div class="dictItem" onmousedown="openDict(4)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/mist.png')"></div>
-            <div class="dictItem" onmousedown="openDict(5)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/water.png')"></div>
-            <div class="dictItem" onmousedown="openDict(6)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/water.png')"></div>
-            <div class="dictItem" onmousedown="openDict(7)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/water.png')"></div>
-            <div class="dictItem" onmousedown="openDict(0)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/water.png')"></div>
-            <div class="dictItem" onmousedown="openDict(1)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/earth.png')"></div>
-            <div class="dictItem" onmousedown="openDict(2)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/fire.png')"></div>
-            <div class="dictItem" onmousedown="openDict(3)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/air.png')"></div>
-            <div class="dictItem" onmousedown="openDict(4)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/mist.png')"></div>
-            <div class="dictItem" onmousedown="openDict(5)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/water.png')"></div>
-            <div class="dictItem" onmousedown="openDict(6)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/water.png')"></div>
-            <div class="dictItem" onmousedown="openDict(7)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/water.png')"></div>
-            <div class="dictItem" onmousedown="openDict(0)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/water.png')"></div>
-            <div class="dictItem" onmousedown="openDict(1)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/earth.png')"></div>
-            <div class="dictItem" onmousedown="openDict(2)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/fire.png')"></div>
-            <div class="dictItem" onmousedown="openDict(3)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/air.png')"></div>
-            <div class="dictItem" onmousedown="openDict(4)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/mist.png')"></div>
-            <div class="dictItem" onmousedown="openDict(5)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/water.png')"></div>
-            <div class="dictItem" onmousedown="openDict(6)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/water.png')"></div>
-            <div class="dictItem" onmousedown="openDict(7)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/water.png')"></div>
-            <div class="dictItem" onmousedown="openDict(0)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/water.png')"></div>
-            <div class="dictItem" onmousedown="openDict(1)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/earth.png')"></div>
-            <div class="dictItem" onmousedown="openDict(2)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/fire.png')"></div>
-            <div class="dictItem" onmousedown="openDict(3)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/air.png')"></div>
-            <div class="dictItem" onmousedown="openDict(4)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/mist.png')"></div>
-            <div class="dictItem" onmousedown="openDict(5)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/water.png')"></div>
-            <div class="dictItem" onmousedown="openDict(6)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/water.png')"></div>
-            <div class="dictItem" onmousedown="openDict(7)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/water.png')"></div>
-            <div class="dictItem" onmousedown="openDict(0)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/water.png')"></div>
-            <div class="dictItem" onmousedown="openDict(1)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/earth.png')"></div>
-            <div class="dictItem" onmousedown="openDict(2)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/fire.png')"></div>
-            <div class="dictItem" onmousedown="openDict(3)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/air.png')"></div>
-            <div class="dictItem" onmousedown="openDict(4)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/mist.png')"></div>
-            <div class="dictItem" onmousedown="openDict(5)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/water.png')"></div>
-            <div class="dictItem" onmousedown="openDict(6)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/water.png')"></div>
-            <div class="dictItem" onmousedown="openDict(7)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/water.png')"></div>
-            <div class="dictItem" onmousedown="openDict(0)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/water.png')"></div>
-            <div class="dictItem" onmousedown="openDict(1)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/earth.png')"></div>
-            <div class="dictItem" onmousedown="openDict(2)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/fire.png')"></div>
-            <div class="dictItem" onmousedown="openDict(3)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/air.png')"></div>
-            <div class="dictItem" onmousedown="openDict(4)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/mist.png')"></div>
-            <div class="dictItem" onmousedown="openDict(5)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/water.png')"></div>
-            <div class="dictItem" onmousedown="openDict(6)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/water.png')"></div>
-            <div class="dictItem" onmousedown="openDict(7)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/water.png')"></div>
-            <div class="dictItem" onmousedown="openDict(0)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/water.png')"></div>
-            <div class="dictItem" onmousedown="openDict(1)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/earth.png')"></div>
-            <div class="dictItem" onmousedown="openDict(2)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/fire.png')"></div>
-            <div class="dictItem" onmousedown="openDict(3)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/air.png')"></div>
-            <div class="dictItem" onmousedown="openDict(4)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/mist.png')"></div>
-            <div class="dictItem" onmousedown="openDict(5)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/water.png')"></div>
-            <div class="dictItem" onmousedown="openDict(6)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/water.png')"></div>
-            <div class="dictItem" onmousedown="openDict(7)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/water.png')"></div>
-            <div class="dictItem" onmousedown="openDict(0)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/water.png')"></div>
-            <div class="dictItem" onmousedown="openDict(1)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/earth.png')"></div>
-            <div class="dictItem" onmousedown="openDict(2)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/fire.png')"></div>
-            <div class="dictItem" onmousedown="openDict(3)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/air.png')"></div>
-            <div class="dictItem" onmousedown="openDict(4)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/mist.png')"></div>
-            <div class="dictItem" onmousedown="openDict(5)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/water.png')"></div>
-            <div class="dictItem" onmousedown="openDict(6)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/water.png')"></div>
-            <div class="dictItem" onmousedown="openDict(7)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/water.png')"></div>
+        <p id="dictionaryDisclaimer">You have found 18/8211 items and 40/15600 recipes.</p>
+        <div class="dictionaryGradient" data-up></div>
+        <div class="dictionaryContainer" id="dictionaryContainer">
         </div>
         <div class="dictionaryGradient"></div>
+    </div>
+    <div class="iteminfo" id="iteminfo">
+        <p class="uiinfoDisclaimer" id="iteminfoDisclaimer">Water</p>
+        <div class="iteminfoItemHolder">
+            <div class="uiinfoItem" id="iteminfoItem" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/water.png')"></div>
+            <p class="uiinfoDescription" id="iteminfoDescription">`A fluid force that shapes and sustains life, capable of both gentle flow and powerful destruction.`</p>
+        </div>
+        <p class="iteminfoCollectionTitle" id="iteminfoCombination">Combinations (2/38)</p>
+        <div class="iteminfoCombinations" id="iteminfoCombinations">
+            <div class="iteminfoCombination">
+                <div class="iteminfoCombinationItem">
+                    <div class="iteminfoCombinationImg" onclick="openDict(5)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/steam.png')"></div>
+                    <p class="iteminfoCombinationText">Steam</p>
+                </div>
+                <p class="iteminfoCombinationText">+</p>
+                <div class="iteminfoCombinationItem">
+                    <div class="iteminfoCombinationImg" onclick="openDict(5)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/water.png')"></div>
+                    <p class="iteminfoCombinationText">Water</p>
+                </div>
+                <p class="iteminfoCombinationText">=</p>
+                <div class="iteminfoCombinationItem">
+                    <div class="iteminfoCombinationImg" onclick="openDict(5)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/water.png')"></div>
+                    <p class="iteminfoCombinationText">Water</p>
+                </div>
+            </div>
+        </div>
+        <p class="iteminfoCollectionTitle" id="iteminfoPotential">Potential (2/38)</p>
+        <div class="iteminfoCombinations" id="iteminfoPotentials">
+            <div class="iteminfoCombination">
+                <div class="iteminfoCombinationItem">
+                    <div class="iteminfoCombinationImg" onclick="openDict(5)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/steam.png')"></div>
+                    <p class="iteminfoCombinationText">Steam</p>
+                </div>
+                <p class="iteminfoCombinationText">+</p>
+                <div class="iteminfoCombinationItem">
+                    <div class="iteminfoCombinationImg" onclick="openDict(5)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/water.png')"></div>
+                    <p class="iteminfoCombinationText">Water</p>
+                </div>
+                <p class="iteminfoCombinationText">=</p>
+                <div class="iteminfoCombinationItem">
+                    <div class="iteminfoCombinationImg" onclick="openDict(5)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/water.png')"></div>
+                    <p class="iteminfoCombinationText">Water</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="hint" id="hint">
+        <p class="uiinfoDisclaimer" id="hintDisclaimer">Water</p>
+        <div class="iteminfoItemHolder">
+            <div class="uiinfoItem" id="hintItem" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/water.png')"></div>
+            <p class="uiinfoDescription" id="hintDescription">`A fluid force that shapes and sustains life, capable of both gentle flow and powerful destruction.`</p>
+        </div>
+        <p class="iteminfoCollectionTitle">Possible Combination</p>
+        <div class="iteminfoCombinations">
+            <div class="iteminfoCombination" id="hintComb">
+                <div class="iteminfoCombinationItem">
+                    <div class="iteminfoCombinationImg" onclick="openHint(5)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/steam.png')"></div>
+                    <p class="iteminfoCombinationText">Steam</p>
+                </div>
+                <p class="iteminfoCombinationText">+</p>
+                <div class="iteminfoCombinationItem">
+                    <div class="iteminfoCombinationImg" onclick="openHint(2)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/water.png')"></div>
+                    <p class="iteminfoCombinationText">Water</p>
+                </div>
+                <p class="iteminfoCombinationText">=</p>
+                <div class="iteminfoCombinationItem">
+                    <div class="iteminfoCombinationImg" onclick="openHint(4)" style="background-image: url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/water.png')"></div>
+                    <p class="iteminfoCombinationText">Water</p>
+                </div>
+            </div>
+        </div>
     </div>
 </body>
 
