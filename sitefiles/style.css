@@ -249,22 +249,6 @@ body {
   .gamebutton:hover {
     color: var(--shade5);
   }
-  .backButton {
-    pointer-events: all;
-    cursor: pointer;
-    display: block;
-    color: var(--shade3);
-    font-size: 200%;
-    margin-bottom: 8px;
-    transform: scale(2);
-    position: relative;
-    bottom: 595px;
-    left: 40px;
-    transition: color 0.1s;
-  }
-  .backButton:hover {
-    color: var(--shade5);
-  }
 
   #gb_clean {
     animation: none;
@@ -628,8 +612,10 @@ body {
   outline: var(--shade1) solid 4px;
   outline-offset: 12px;
 }
-
-
+.hint[data-wiggle="1"] {
+  transform: translateX(-50%) translateY(-50%) scale(1.1);
+  transition: transform 0.02s, opacity 0.4s, outline 0.4s, outline-offset 0.4s;
+}
 ::-webkit-scrollbar {
   width: 5px;
 }

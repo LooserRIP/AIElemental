@@ -562,16 +562,37 @@ function gb_hint() {
 function openHint(id) {
   if (id < 4) return;
   console.log(id, database.elements[id].name);
-  if (openedMenu.includes("hint")) exitMenu()
+  if (openedMenu.includes("hint")) {
+    exitMenu()
+    document.getElementById("hint").dataset['wiggle'] = "1";
+  } 
+    
   document.getElementById("hintItem").style.backgroundImage = "url('https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/" + database.elements[id].stripped + ".png')";
   document.getElementById("hintDisclaimer").innerText = database.elements[id].name;
   document.getElementById("hintDescription").innerText = database.elements[id].description;
   let collsplit = database.elements[id].discovered;
   if (collsplit.length == 1) collsplit.push(collsplit[0]);
+  if (collsplit.length > 2 && false) {
+    let clsp = [collsplit[1], collsplit[2]].sort()
+    if (database.recipes[clsp[0] + "." + clsp[1]] == collsplit[0]) {
+      collsplit[1] = collsplit[0]
+    }
+  }
+  console.log(collsplit)
+  var recipeArray = [];
+  var recipeKeys = Object.keys(database.recipes);
+  recipeKeys.forEach(recipeCheck => {
+    if (database.recipes[recipeCheck] == id) {
+      let collsplit2 = recipeCheck.split(".").map(Number);
+      recipeArray.push({recipe: collsplit2, depth: database.elements[collsplit2[0]].depth + database.elements[collsplit2[1]].depth})
+    }
+  })
+  recipeArray = recipeArray.sort((a, b) => a.depth - b.depth);
+  collsplit = recipeArray[0].recipe;
   console.log(collsplit)
   let infocombelm = document.createElement("div");
   infocombelm.className = "iteminfoCombination";
-  console.log(database.elements[collsplit[0]]);
+  console.log(database.elements[recipeArray[0]]);
   var innercomb = '<div class="iteminfoCombinationItem"><div class="iteminfoCombinationImg" onclick="openHint(' + collsplit[0] + ')" style="background-image: url(\'https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/' + database.elements[collsplit[0]].stripped +'.png\')"></div><p class="iteminfoCombinationText">' + database.elements[collsplit[0]].name + '</p></div><p class="iteminfoCombinationText">+</p><div class="iteminfoCombinationItem"><div class="iteminfoCombinationImg" onclick="openHint(' + collsplit[1] + ')" style="background-image: url(\'https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/' + database.elements[collsplit[1]].stripped + '.png\')"></div><p class="iteminfoCombinationText">' + database.elements[collsplit[1]].name + '</p></div><p class="iteminfoCombinationText">=</p><div class="iteminfoCombinationItem"><div class="iteminfoCombinationImg" style="background-image: url(\'https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/' + database.elements[id].stripped + '.png\')"></div><p class="iteminfoCombinationText">' + database.elements[id].name + '</p></div>'
   console.log(innercomb)
   infocombelm.innerHTML = innercomb;
