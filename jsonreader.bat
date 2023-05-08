@@ -1,2 +1,3 @@
 @echo off
-python jsonreader.py
+python shapegenerator.py
+python

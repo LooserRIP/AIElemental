@@ -124,20 +124,20 @@ def saveConfig():
         counterBackup = 0
         shutil.copy(config_path, "database_backup.json")
 
-idgc = 0;
-for icg in config['elements']:
-    potential = 0;
-    recipes = 0;
-    for recipesg in config['recipes']:
-        recipeGet = f".{recipesg}.";
-        if f".{idgc}." in recipeGet:
-            potential += 1;
-        if config['recipes'][recipesg] == idgc:
-            recipes += 1;
-    config['elements'][idgc]['potential'] = potential;
-    config['elements'][idgc]['recipes'] = recipes;
-    print(str(idgc) + ", "+ config['elements'][idgc]['name'])
-    idgc += 1;
+#idgc = 0;
+#for icg in config['elements']:
+#    potential = 0;
+#    recipes = 0;
+#    for recipesg in config['recipes']:
+#        recipeGet = f".{recipesg}.";
+#        if f".{idgc}." in recipeGet:
+#            potential += 1;
+#        if config['recipes'][recipesg] == idgc:
+#            recipes += 1;
+#    config['elements'][idgc]['potential'] = potential;
+#    config['elements'][idgc]['recipes'] = recipes;
+#    print(str(idgc) + ", "+ config['elements'][idgc]['name'])
+#    idgc += 1;
         
         
 saveConfig()
