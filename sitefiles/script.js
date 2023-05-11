@@ -69,6 +69,7 @@ function init() {
   collectionitems.forEach(addToSidebar => {
     addNewItem(addToSidebar)
   })
+  startMusic();
 }
 let distanceLerp = 0;
 let bringBack = [];
@@ -578,6 +579,8 @@ function openHint(id) {
       collsplit[1] = collsplit[0]
     }
   }
+
+  
   console.log(collsplit)
   var recipeArray = [];
   var recipeKeys = Object.keys(database.recipes);
@@ -603,4 +606,67 @@ function openHint(id) {
 function biasedRandomNumber(power, max) {
   const rand = Math.random();
   return Math.floor(Math.pow(rand, power) * max);
+}
+
+
+
+var musicStructure = [];
+var structurePaths = [];
+
+async function startMusic() {
+  var compressor = Howler.ctx.createDynamicsCompressor();
+  Howler.masterGain.disconnect(Howler.ctx.destination);
+  Howler.masterGain.connect(compressor);
+  compressor.connect(Howler.ctx.destination);
+  structurePaths.push({structure: "intro"},{structure: "introbuildup"})
+  renderAudioFiles();
+  console.log(":D");
+  var sp = null;
+  while(true) {
+    if (structurePaths.length == 0) {
+      continueMusicStructure(sp);
+      renderAudioFiles();
+    }
+    console.log(structurePaths);
+    sp = structurePaths.shift();
+    await sleep(38.4);
+  }
+}
+function continueMusicStructure(prev) {
+  var random = Math.random() * 100;
+  if (prev == "buildup") {
+    structurePaths.push({structure: "normal"},{structure: "normal"});
+  } else if (random > 50) {
+      structurePaths.push({structure: "normal"},{structure: "normal"});
+    } else {
+      if (random < 33) {
+        structurePaths.push({structure: "ambient"},{structure: "ambient"});
+      } else {
+        structurePaths.push({structure: "ambient"},{structure: "ambient"},{structure: "ambient"},{structure: "buildup"});
+      }
+    }
+}
+function renderAudioFiles() {
+  structurePathsNew = [];
+  structurePaths.forEach(structureelmd => {
+    let structureelm = structureelmd['structure'];
+    if (structureelmd['paths'] == undefined) {
+      let paths = [];
+      if (structureelm == "intro") paths.push("arp_intro")
+      if (structureelm == "introbuildup") paths.push("arp_buildup", "percussion_buildup")
+      if (structureelm == "buildup") paths.push("arp_buildup", "percussion_buildup")
+      structurePathsNew.push({structure: structureelm, paths: paths});
+    } else {
+      structurePathsNew.push(structureelmd);
+    }
+  })
+  structurePathsNew = structurePaths;
+}
+
+function playSound(path) {
+  var sound = new Howl({
+    src: ['sounds/' + path + '.mp3'],
+    volume: 1
+  });
+  sound.play();
 }

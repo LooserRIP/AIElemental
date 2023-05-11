@@ -71,9 +71,10 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 xm = load_model('transmitter', device=device)
 model = load_model('text300M', device=device)
 diffusion = diffusion_from_config(load_config('diffusion'))
+
 batch_size = 4
 guidance_scale = 15.0
-prompt = "A collection of atoms and molecules in motion"
+prompt = "a shark"
 
 latents = sample_latents(
     batch_size=batch_size,
@@ -98,7 +99,7 @@ cameras = create_pan_cameras(size, device)
 for i, latent in enumerate(latents):
     images = decode_latent_images(xm, latent, cameras, rendering_mode=render_mode)
     display(gif_widget(images))
-
+    
 for it in config['elements']:
     print(str(igg) + ", " + it['textureprompt'].replace("\n",""))
     igg += 1;

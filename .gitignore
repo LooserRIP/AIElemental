@@ -1,3 +1,9 @@
 
 bgremove/
 bgremove_py37/
+shap_e_model_cache/ViT-L-14.pt
+shap_e_model_cache/transmitter.pt
+shap_e_model_cache/transmitter_config.yaml
+shap_e_model_cache/text_cond_config.yaml
+shap_e_model_cache/text_cond.pt.tmp
+shap_e_model_cache/text_cond.pt.lock
