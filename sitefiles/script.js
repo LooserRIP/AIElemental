@@ -1,1009 +1,1619 @@
-let fulljson;
-let totalbrowserdiv;
-let elementname;
-let elementnamediv;
-let addcount;
-let addsugg;
-let addrecipe;
-let refetch;
-let fetchbody;
-
-
-
-
-
+ 
 
 const sleep = (milliseconds) => {
   return new Promise(resolve => setTimeout(resolve, milliseconds))
 }
 
-
+let database;
+let depths;
+let totaldepths;
+let jsonLoaded = false;
+let bodyLoaded = false;
+let mousePosition = {x: 0, y: 0};
+let currentlyDragging = null;
+let dragOffset = {x: 0, y: 0}
+let bringBackSidebar = null;
+let currentlyHovering = null;
+let combineCircle = null;
+let currentlyDraggingCounter = 0;
+let hintHistory = [];
+let spriteDirectory = "https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/";
+let elmPaths = [
+  ["water_bass", "water_chillbeat", "water_flowerpad", "water_groovebeat", "water_heaven", "water_mysticbass"],    // Water
+  ["earth_chillbeat", "earth_distortedmysticbass", "earth_groovebeat"],    // Earth
+  ["fire_bass", "fire_bmo", "fire_distantmelody", "fire_distortedanimal", "fire_explosion", "fire_ghostchoir", "fire_overkillpiano"],    // Fire
+  ["air_bmo", "air_coldsun", "air_fluteradio", "air_futureplucks", "air_hightwinkles", "air_photosynthesis", "air_twinkles"]]   // Air
+let additionalAudioLoads = ["structure_intro", "structure_water", "structure_earth", "structure_fire", "structure_air", "bg_windandbirds", "bg_thunderandrain", "bg_windandthunder", "bg_windandrain"]
+let sfxPaths = ["sfx_newitem", "sfx_itemmade", "sfx_combining", "sfx_menuopen", "sfx_menuclose", "sfx_menuchange", "sfx_dragstart", "sfx_dragend", "sfx_nocombination", "sfx_dupe", "sfx_newitem2"];
+let soundDictionary = {};
+let audioClones = [];
+let audioChangeVolume = {"air_coldsun": 0.8, "fire_bmo": 0.5, 
+"structure_water": 0.8, "air_twinkles": 0.5, "water_heaven": 0.3, "air_hightwinkles": 0.75, 
+"earth_groovebeat": 0.4, "earth_chillbeat": 0.4, "fire_distortedanimal": 0.35, "earth_distortedmysticbass": 0.7,
+"air_photosynthesis": 0.75, "air_fluteradio": 0.7, "fire_explosion": 0.5, "water_flowerpad": 0.75};
+let musicVolume = 1;
+let sfxVolume = 1;
+let ambientVolume = 1;
+let gameStyle = 0;
+let styleNames = ["Classic", "Epic"];
+let audioLoaded = false;
+let initHappened = false;
+let zoomFactor;
+let settings = {};
+/*
 (async () => {
-
-  totalbrowserdiv = document.getElementById("makearea");
-
-  fulljson = await fetch("/recipes.json");
-  fulljson = await fulljson.json();
-  
-  await sleep(10);
-  subloop();
-  addAnims();
-  
-
-  
+  var request = new XMLHttpRequest();
+  request.open("GET", "https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/database.json", false);
+  request.send(null)
+  database = JSON.parse(request.responseText);
+  jsonLoaded = true;
+  consolelog("Json Loaded")
+  if (bodyLoaded) {
+    init()
+  }
 })();
+*/
 
-
-async function subloop() {
-  
-  initSide();
-  elementname = document.getElementById("elementname");
-  elementnamediv = document.getElementById("elementnamediv");
-  while(true) {
-  attemptrefetch();
-  await sleep(10000);
+function saveSettings() {
+  settings.style = gameStyle;
+  settings.volumes[0] = musicVolume;
+  settings.volumes[1] = sfxVolume;
+  settings.volumes[2] = ambientVolume;
+  localStorage['lagpt_settings'] = JSON.stringify(settings);
+}
+function loadSettings() {
+  if (localStorage['lagpt_settings'] == undefined) {
+    localStorage['lagpt_settings'] = JSON.stringify({style: 0, volumes: [1,1,1]})
   }
-  
+  settings = JSON.parse(localStorage.lagpt_settings);
+  musicVolume = settings.volumes[0];
+  sfxVolume = settings.volumes[1];
+  ambientVolume = settings.volumes[2];
+  document.getElementById("volume_music").value = musicVolume;
+  document.getElementById("volume_sfx").value = sfxVolume;
+  document.getElementById("volume_ambient").value = ambientVolume;
+  gameStyle = settings.style;
+  changeVolumeOutput();
 }
-
-
-async function attemptrefetch() {
-  await sleep(1000);
-  var fulljsontemp = await fetch("/recipes.json");
-  fulljson = await fulljsontemp.json();
+function attemptSaveBoard() {
+  saveBoard();
 }
-
-async function refetchjson () {
-    if (refetch) {
-    refetch = false;
-    var jsonchange = await fetch("https://laugc.glitch.me/additem", {
-    method: "POST",
-    body: fetchbody
-    }) 
-    if (JSON.stringify(jsonchange).includes("A:")) {
-      alert("Submission Error: " + jsonchange.slice(2));
-    } else {
-      fulljson = await jsonchange.json();
+function saveBoard() {
+  let totalSaveList = [];
+  let gameElms = document.getElementsByClassName("gameelement");
+  for (const gameElm of gameElms) {
+    if (gameElm.dataset['id'] != undefined && gameElm.dataset['small'] == "0") {
+      totalSaveList.push({id: parseInt(gameElm.dataset['id']), left: parseInt(gameElm.style.left), top: parseInt(gameElm.style.top)});
     }
-    
-    refetch=false;
   }
+  localStorage['lagpt_boardsave'] = JSON.stringify(totalSaveList);
 }
-
-function initSide() {
-  
-  var gck = getCookie("collection");
-  if (getCookie("collection") == "") {
-    setCookie("collection", "*1**2**3**4**5**6*", 365);
-    gck = "*1**2**3**4**5**6*";
-  }
-  
-  var skip = 0;
-  var buildcookie = "";
-  for(let ai = 0; ai < gck.length; ai++) { //if checkmark skip if not build up text until checkmark
-    if (gck[ai] == "*") {
-      if (buildcookie != "") {
-        addSide(parseInt(buildcookie));
-        buildcookie = "";
+async function loadBoard() {
+  if (localStorage["lagpt_boardsave"] != undefined) {
+    let parseBoard = JSON.parse(localStorage.lagpt_boardsave);
+    var elms = document.getElementsByClassName("gameelement");
+    for (const elmr of elms) {
+      if (elmr.dataset.id != undefined) {
+        destroyElm(elmr, -1)
       }
-    } else {
-      buildcookie = buildcookie + gck[ai];
+    }
+    let i = 0;
+    parseBoard.forEach(elm => {
+      loadBoardElm(elm, i)
+      i++;
+    })
+  }
+}
+async function refreshBoardTextures() {
+  let parseBoard = JSON.parse(localStorage.lagpt_boardsave);
+  var elms = document.getElementsByClassName("gameelement");
+  for (const elmr of elms) {
+    if (elmr.dataset.id != undefined) {
+      elmr.childNodes[1].style.backgroundImage = 'url(\'%^%%1%.png\')'.replace("%1%", database.elements[parseInt(elmr.dataset.id)].stripped).replace("%^%", spriteDirectory);
     }
   }
-  
 }
 
+async function loadBoardElm(elm, i) {
+  console.log(elm.id, elm.left, elm.top)
+  let spitem = spawnitem(elm.id, elm.left, elm.top, true);
+  let tempi = parseInt(i);
+  console.log(tempi);
+  await sleep(100 + (100 * tempi))
+  spitem.dataset["small"] = "0";
+  spitem.dataset["newitem"] = "1";
+  i++;
 
-
-
-
-
-
-function addSide(aid) {
-        if (aid > fulljson.length || aid < 0) {
-          return;
-        }
-        var item = fulljson[aid - 1];
-        var div = document.createElement("DIV");
-        div.setAttribute("class", "sideelement");
-        var txt = document.createElement("P");
-        txt.setAttribute("class", "presult");
-        if (item.name.length < 20) {
-          txt.innerHTML = item.name;
-        } else {
-          txt.innerHTML = item.name.slice(0, 35);
-        }
-        var btn = document.createElement("INPUT");
-        btn.setAttribute("type", "image");
-        btn.setAttribute("src", demat(item.material));
-        btn.setAttribute("onclick", 'clickbtn("' + item.name + '");' ); //            onclick="checkbox(this);"
-        btn.setAttribute("class", "resultimg");
-        btn.setAttribute("draggable", "false");
-        btn.innerHTML = "";
-        btn.setAttribute("onmousedown", "dragElement(" + aid + ", this)");       
-  
-        div.appendChild(btn);
-        div.appendChild(txt);
-        document.getElementById("sidebar").appendChild(div);
 }
+let prevMobileStatus = false;
+function checkMobile() {
+  let viewportWidth  = document.documentElement.clientWidth;
+  let viewportHeight = document.documentElement.clientHeight;
+  console.log(viewportWidth);
+  let isMobile = (viewportWidth <= 680);
+  if (prevMobileStatus != isMobile) {
+    if (isMobile) {
+      document.getElementById("gamebuttons").dataset['disable'] = "1";
+      document.getElementById("gamebuttonsdown").dataset['disable'] = "0";
+      document.body.style.zoom = "50%";
+      zoomFactor = parseFloat(document.body.style.zoom) / 100 || 1;
+    } else {
+      document.getElementById("gamebuttons").dataset['disable'] = "0";
+      document.getElementById("gamebuttonsdown").dataset['disable'] = "1";
+      document.body.style.zoom = "80%";
+      zoomFactor = parseFloat(document.body.style.zoom) / 100 || 1;
+    }
+    prevMobileStatus = isMobile;
+    if (initHappened) {
 
-function dragElement(did, bt) {
-  bt.addEventListener("onmousemove", dragMoveHandler(did));
-}
-
-function dragMoveHandler(did, e) {
-  if (!e) e = window.event; 
-  spawnElement(did, e.clientY - 50, e.clientX - 50, true, e);
-  
-}
-function spawnDragElement(ido, x, y, event) {
-  var id = ido - 1;
-  var div = document.createElement("DIV");
-  div.setAttribute("class", "element");
-  div.setAttribute("data-id", id);
-  div.setAttribute(
-    "style",
-    "position: absolute; top: " + x + "px; left: " + y + "px;"
-  );
-  div.setAttribute("onmousedown", "drag(this, event);");
-  var btn = document.createElement("IMG");
-  btn.setAttribute(
-    "src",
-    demat(fulljson[id].material)
-  );
-  div.addEventListener("mouseleave", function (event) {
-    btn.setAttribute("height", "100");
-    btn.setAttribute("width", "100");
-    //div.style.height = "125px";
-    //div.style.width = "125px";
-    btn.setAttribute("class", "elementimg");
-    
-    elementname.textContent = "";
-    //console.log("false " + fulljson[id].name)
-  }, false);
-  div.addEventListener("mouseover", function (event) {
-    btn.setAttribute("height", "110");
-    btn.setAttribute("width", "110");
-    elementname.textContent = fulljson[id].name;
-    //div.style.height = "125px";
-    //div.style.width = "125px";
-    //console.log("true " + fulljson[id].name)
-  }, false);
-  btn.setAttribute("class", "resultimg");
-  btn.setAttribute("height", "100");
-  btn.setAttribute("width", "100");
-    btn.setAttribute("class", "elementimg");
-  btn.setAttribute("draggable", "false");
-  btn.innerHTML = "";
-  div.appendChild(btn);
-  totalbrowserdiv = document.getElementById("makearea");
-  totalbrowserdiv.appendChild(div);
-  drag(div, event);
-}
-function spawnElement(ido, x, y, dragv, dragevent) {
-  if (adduitrue) {
-    return;
+      renderSidebar();
+      saveBoard();
+      loadBoard();
+    }
   }
-  var id = ido - 1;
-  var div = document.createElement("DIV");
-  div.setAttribute("class", "element");
-  div.setAttribute("data-id", id);
-  div.setAttribute(
-    "style",
-    "position: absolute; top: " + x + "px; left: " + y + "px;"
-  );
-  div.setAttribute("onmousedown", "drag(this, event);");
-  var btn = document.createElement("IMG");
-  btn.setAttribute(
-    "src",
-    demat(fulljson[id].material)
-  );
-  div.addEventListener("mouseleave", function (event) {
-    div.style.zIndex = 0;
-    btn.setAttribute("height", "100");
-    btn.setAttribute("width", "100");
-    elementname.textContent = "";
-    //div.style.height = "125px";
-    //div.style.width = "125px";
-    btn.setAttribute("class", "elementimg");
-  }, false);
-  div.addEventListener("mouseover", function (event) {
-    div.style.zIndex = 3;
-    btn.setAttribute("height", "110");
-    btn.setAttribute("width", "110");
-    elementnamediv.style.left = div.style.left;
-    elementnamediv.style.top = (parseInt(div.style.top) + 80) + "px";
-    elementname.textContent = fulljson[id].name;
+}
 
-    //div.style.height = "125px";
-    //div.style.width = "125px";
-    //console.log("true " + fulljson[id].name)
-  }, false);
-  btn.setAttribute("class", "resultimg");
-  btn.setAttribute("height", "100");
-  btn.setAttribute("width", "100");
-    btn.setAttribute("class", "elementimg");
-  btn.setAttribute("draggable", "false");
-  btn.innerHTML = "";
-  div.appendChild(btn);
-  totalbrowserdiv = document.getElementById("makearea");
-  totalbrowserdiv.appendChild(div);
-  if (dragv) {
-  drag(div, dragevent);
+function initbody() {
+  zoomFactor = parseFloat(document.body.style.zoom) / 100 || 1;
+  loadSettings();
+  updateStyle();
+  console.log(zoomFactor);
+  bodyLoaded = true;
+  consolelog("Body Initialized")
+  checkMobile();
+  combineCircle = document.getElementById("combinecircle");
+  document.addEventListener('mousemove', function(event) {
+      mousePosition.x = event.pageX / zoomFactor;
+      mousePosition.y = event.pageY / zoomFactor;
+  });
+  document.addEventListener('touchmove', function(event) {
+      var touchLocation = event.targetTouches[0];
+      mousePosition.x = touchLocation.pageX / zoomFactor;
+      mousePosition.y = touchLocation.pageY / zoomFactor;
+      console.log(mousePosition);
+  });
+  document.addEventListener('mouseup', function(event) {
+    consolelog("stopped dragging")
+    stopDrag()
+  });
+  document.addEventListener('touchend', function(event) {
+    consolelog("stopped dragging")
+    stopDrag()
+  });
+  window.addEventListener("resize", checkMobile);
+  preload();
+}
+function updateStyle() {
+  if (gameStyle >= styleNames.length) gameStyle = 0;
+  document.getElementById("stylesetting").innerText = "Style: " + styleNames[gameStyle];
+  if (gameStyle == 0) {
+    spriteDirectory = "https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/";
+  }
+  if (gameStyle == 1) {
+    spriteDirectory = 'https://raw.githubusercontent.com/LooserRIP/AIElemental-EnvStyle/main/EnvStyle/';
+    document.documentElement.style.setProperty('--br', '12%');
+    document.documentElement.style.setProperty('--hitboxsize', '1.422');
+  }
+  if (initHappened) {
+    renderSidebar();
+    refreshBoardTextures();
+  }
+}
+async function preload() {
+  const soundPaths = elmPaths.flat();
+  const jsonURL = 'https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/database.json';
+  
+  let loadCount = 0;
+  let totalResources = soundPaths.length + 1; // Add 1 for the JSON file
+  const soundPathsCombined = soundPaths.concat(additionalAudioLoads);
+  //const sound = new Pizzicato.Sound({ source: 'file', options: { path: 'https://raw.githubusercontent.com/LooserRIP/LooserRIP.github.io/master/sitefiles/sounds/' + path + ".mp3" } }, () => {
+
+  
+  // Load all resources using Promise.all
+  
+  await loadJSON(jsonURL);
+  const _soundPromises = sfxPaths.map(loadSound);
+  const _soundsg = await Promise.all(_soundPromises);
+  console.log('JSON data loaded');
+  document.getElementById("menubg").dataset.loading = "2";
+  //let origText = document.getElementById("loadingtitle").innerText + "";
+  dissolveText(document.getElementById("loadingtitle"), "    Loading...    ", "Little Alchemy GPT", 38);
+  await sleep(38 * 17);
+  const soundPromises = soundPathsCombined.map(loadSound);
+  const soundsg = await Promise.all(soundPromises);
+  console.log("finished loading");
+  // Now, all sounds and JSON data are loaded, and you can use them in your application
+  console.log('All resources loaded');
+  
+  // Use the spread operator to log all loaded sounds
+  console.log('All sounds loaded');
+  audioLoaded = true;
+  soundRender();
+  if (initHappened) {
+    startMusic();
+  }
+  //document.getElementById("loadingtitle").innerText = "Little Alchemy GPT"
+  
+  async function loadJSON(url) {
+    const response = await fetch(url);
+    database = await response.json();
+    return 0;
+  }
+  function loadSound(url) {
+    return new Promise(async (resolve) => {
+      console.log("loading " + url);
+      const sound = await new Pizzicato.Sound({ source: 'file', options: { path: 'https://raw.githubusercontent.com/LooserRIP/LooserRIP.github.io/master/sitefiles/sounds/' + url + ".mp3" } }, () => {
+        soundDictionary[url] = sound;
+        console.log("loaded " + url);
+        //document.getElementById("loadingtitle").innerText = "Loading... (" + loadCount + "/35)";
+        loadCount++;
+        resolve(sound);
+      });
+    });
+  }
+  
+    
+}
+
+
+async function soundRender() {
+  if (!audioLoaded) return;
+  const soundPaths = elmPaths.flat();
+  const soundPathsCombined = soundPaths.concat(additionalAudioLoads);
+  sfxPaths.forEach(sfxPath => {
+    let mixMult = 1;
+    if (audioChangeVolume[sfxPath] != undefined) mixMult = audioChangeVolume[sfxPath];
+    soundDictionary[sfxPath].volume = mixMult * sfxVolume;
+   // console.log("changed SFX '" + sfxPath + "' volume to " + soundDictionary[sfxPath].volume);
+  })
+  soundPathsCombined.forEach(soundPath => {
+    let mixMult = 1;
+    if (audioChangeVolume[soundPath] != undefined) mixMult = audioChangeVolume[soundPath];
+    let volumeSet = mixMult * musicVolume;
+    if (soundPath.startsWith("bg_")) {
+      volumeSet = mixMult * ambientVolume;
+     // console.log("changed AMBIENT '" + soundPath + "' volume to " + volumeSet);
+    } else {
+     // console.log("changed MUSIC '" + soundPath + "' volume to " + volumeSet);
+    }
+    soundDictionary[soundPath].volume = volumeSet;
+  })
+  audioClones.forEach(aclone => {
+    let mixMult = 1;
+    if (audioChangeVolume[aclone.name] != undefined) mixMult = audioChangeVolume[aclone.name];
+    let volumeSet = mixMult * musicVolume;
+    if (aclone.name.startsWith("bg_")) volumeSet = mixMult * ambientVolume;
+    aclone.sound.volume = volumeSet;
+  })
+}
+
+async function dissolveText(element, oldText, newText, interval) {
+  let currentIndexes = Array.from({ length: oldText.length }, (_, i) => i);
+  let currentText = oldText.split('');
+  const changeLetter = () => {
+      if (currentIndexes.length === 0) return;
+
+      const randomIndex = Math.floor(Math.random() * currentIndexes.length);
+      const index = currentIndexes[randomIndex];
+      currentIndexes.splice(randomIndex, 1);
+      let oldtext = currentText[index];
+      currentText[index] = newText[index];
+      element.textContent = currentText.join('');
+      let intervaltemp = interval;
+      if (oldtext == newText[index]) {
+        intervaltemp = 0;
+      }
+      setTimeout(changeLetter, intervaltemp);
+  };
+
+  changeLetter();
+  //setTimeout(changeLetter, interval);
+}
+
+function exitloading() {
+  if (document.getElementById("menubg") == undefined) return;
+  if (document.getElementById("menubg").dataset.loading == "2") init();
+  
+}
+function init() {
+  initHappened = true;
+  delete document.getElementById("menubg").dataset.loading
+  consolelog("Init");
+  setInterval(loop, 5)
+  collection.forEach(collectioncheck => {
+    consolelog(collectioncheck)
+    var res = database['recipes'][collectioncheck];
+    if (!collectionitems.includes(res)) {
+      collectionitems.push(res);
+    }
+  })
+  const elements = [...database.elements].sort((a, b) => a.depth - b.depth);
+  depths = elements.map(element => database.elements.indexOf(element));
+  totaldepths = elements.map(element => database.elements.indexOf(element));
+  //collectionitems = collectionitems.sort((a, b) => a-b);
+  collectionitems.forEach(addToSidebar => {
+    addNewItem(addToSidebar, false)
+  })
+  renderSidebar();
+  loadBoard();
+  if (audioLoaded) {
+    startMusic();
+  }
+}
+let distanceLerp = 0;
+let bringBack = [];
+let waitTimeCC = 0;
+let combining = null;
+let collection = [];
+let collectionitems = [0, 1, 2, 3];
+let doubleclicktimer = 0;
+// Collection Management
+if (localStorage["lagpt_collection"] == undefined) {
+  localStorage["lagpt_collection"] = JSON.stringify([]);
+}
+collection = JSON.parse(localStorage["lagpt_collection"]);
+function collection_checkItem(id) {
+  return collectionitems.includes(id);
+}
+function collection_checkRecipe(ing1, ing2) {
+  if (ing1 > ing2) {
+    return collection.includes(ing2 + "." + ing1)
   } else {
-    if (!dragevent) {
-      var highlight = document.createElement("IMG");
-      highlight.setAttribute("src","https://cdn.discordapp.com/attachments/837293705349038123/901047515879706694/a.png");
-      highlight.setAttribute("width", "150");
-      highlight.setAttribute("height", "150");
-      highlight.setAttribute("class", "elementhighlight");
-      highlight.setAttribute("draggable", "false");
-      highlight.setAttribute("data-rotate", "0");
-      highlight.style.opacity = "0.75";
-      div.insertBefore(highlight,btn);
-    }
-  }
-  
-}
-function drag(elementToDrag, event)
- {
-   if (adduitrue) {
-     return;
-   }
-     var parent = elementToDrag.parentNode;
-     parent.insertBefore(elementToDrag, null);
-     var startX = event.clientX, startY = event.clientY;
-
-     var origX = elementToDrag.offsetLeft , origY = elementToDrag.offsetTop;
-
-     var deltaX = startX - origX, deltaY = startY - origY;
-     if (document.addEventListener) 
-     {
-         // Register capturing event handlers
-         document.addEventListener("mousemove", moveHandler, true);
-         document.addEventListener("mouseup", upHandler, true);
-     }
-     else if (document.attachEvent) 
-     {
-         elementToDrag.setCapture();
-         elementToDrag.attachEvent("onmousemove", moveHandler);
-         elementToDrag.attachEvent("onmouseup", upHandler);
-         elementToDrag.attachEvent("onclosecapture", upHandler);
-     }
-     else 
-     {
-         var oldmovehandler = document.onmousemove; 
-         var olduphandler = document.onmouseup;
-         document.onmousemove = moveHandler;
-         document.onmouseup = upHandler;
-     }
-
-     if (event.stopPropagation) event.stopPropagation();    
-     else event.cancelBubble = true;                        
-
-
-     if (event.preventDefault) event.preventDefault();     
-     else event.returnValue = false;                        
-
-      function moveHandler(e)
-      {
-          if (!e) e = window.event; 
-          elementToDrag.style.left = (e.clientX - deltaX) + "px";
-          elementToDrag.style.top = (e.clientY - deltaY) + "px";
-          elementnamediv.style.left = elementToDrag.style.left;
-          elementnamediv.style.top = (e.clientY - deltaY + 80) + "px";
-          if (e.stopPropagation) e.stopPropagation();      
-          else e.cancelBubble = true;                   
-      }
-
-       function upHandler(e)
-       {
-           elementToDrag.style.zIndex = 0;
-            const width  = window.innerWidth || document.documentElement.clientWidth || 
-            document.body.clientWidth;
-            if (parseInt(elementToDrag.style.left) > (width - 400)) {
-              elementToDrag.parentNode.removeChild(elementToDrag);
-              elementname.textContent = "";
-            }
-         //Combine Detection yay!
-           var getElements = document.getElementsByClassName("element");
-           var overlapFound;
-           overlapFound = false;
-           var overlapElement;
-           
-           for (let i = 0; i < getElements.length; i++) {
-             if (getElements[i] != elementToDrag) {
-               var rect1 = getElements[i].getBoundingClientRect();
-               var rect2 = elementToDrag.getBoundingClientRect();
-               var overlap = !(rect1.right < rect2.left || 
-                rect1.left > rect2.right || 
-                rect1.bottom < rect2.top || 
-                rect1.top > rect2.bottom)
-               if (overlap) {
-               overlapFound = true;
-               overlapElement = getElements[i];
-               }
-             }
-           }
-           if (overlapFound) {
-             var getDataId1 = parseInt(elementToDrag.getAttribute("data-id"));
-             var getDataId2 = parseInt(overlapElement.getAttribute("data-id"));
-             var recipeCode = (getDataId1 + 1) + "-" + (getDataId2 + 1);
-             if (getDataId1 > getDataId2) {
-               var recipeCode = (getDataId2 + 1) + "-" + (getDataId1 + 1);
-             }
-             
-             let queryIndex = -1;
-             for (let fi = 0; fi < fulljson.length; fi++) {
-               if (recipeCode != '0-0') {
-                 if (recipeCode == fulljson[fi].recipe[0] + "-" + fulljson[fi].recipe[1]) {
-                   queryIndex = fi + 1;
-                   break;
-                 }
-               }
-             }
-             if (queryIndex != -1) {
-               var checkcoll = checkCollection(queryIndex);
-               if (checkcoll) {
-               } else {
-                 
-                 addCollection(queryIndex)
-                 addSide(queryIndex);
-               }
-               spawnElement(queryIndex, (parseInt(elementToDrag.style.top) + parseInt(overlapElement.style.top)) / 2, (parseInt(elementToDrag.style.left) + parseInt(overlapElement.style.left)) / 2, false, checkcoll);
-               //spawnElement(queryIndex, parseInt(elementToDrag.style.top), parseInt(elementToDrag.style.left));
-
-               
-               elementToDrag.remove();
-               overlapElement.remove();
-             } else {
-               addcount = 400;
-               addrecipe = recipeCode;
-             }
-             
-           }
-           
-         
-           if (!e) e = window.event;    
-
-           if (document.removeEventListener) 
-            {
-                document.removeEventListener("mouseup", upHandler, true);
-                document.removeEventListener("mousemove", moveHandler, true);
-            }
-            else if (document.detachEvent)  
-            {
-                elementToDrag.detachEvent("onlosecapture", upHandler);
-                elementToDrag.detachEvent("onmouseup", upHandler);
-                elementToDrag.detachEvent("onmousemove", moveHandler);
-                elementToDrag.releaseCapture();
-            }
-            else    
-            {
-                document.onmouseup = olduphandler;
-                document.onmousemove = oldmovehandler;
-            }
-
-            if (e.stopPropagation) e.stopPropagation(); 
-            else e.cancelBubble = true;              
-       }
- }
-
- function closeMe(elementToClose)
- {
-     elementToClose.innerHTML = '';
-     elementToClose.style.display = 'none';
- }
-
- function minimizeMe(elementToMin, maxElement)
- {
-     elementToMin.style.display = 'none';
- }
-function insertAfter(newNode, referenceNode) {
-    referenceNode.parentNode.insertBefore(newNode, referenceNode.nextSibling);
-}
-
-
-function checkCollection(cid) {
-  if (getCookie("collection").includes("*" + cid + "*")) {
-    return true;
+    return collection.includes(ing1 + "." + ing2)
   }
   return false;
 }
-
-function addCollection(cid) {
-  var gc = getCookie("collection");
-  setCookie("collection", gc + "*" + cid + "*");
-}
-
-function setCookie(cname, cvalue) {
-  localStorage.setItem(cname, cvalue)
-}
-
-function getCookie(cname) {
-  var gi = localStorage.getItem(cname);
-  if (gi == null) {
-    gi = "";
+function collection_addRecipe(ing1, ing2) {
+  if (ing1 > ing2) {
+    collection.push(ing2 + "." + ing1)
+    if (!collectionitems.includes(database['recipes'][ing2 + "." + ing1])) collectionitems.push(database['recipes'][ing2 + "." + ing1])
+  } else {
+    collection.push(ing1 + "." + ing2)
+    if (!collectionitems.includes(database['recipes'][ing1 + "." + ing2])) collectionitems.push(database['recipes'][ing1 + "." + ing2])
   }
-  return(gi);
+  localStorage["lagpt_collection"] = JSON.stringify(collection);
+}
+function addNewItem(id, newrender) {
+  if (hintHistory[hintHistory.length - 1] == id) {
+    gb_exithint();
+  }
+  depths.splice(depths.indexOf(id), 1)
+  if (newrender != false) renderSidebar();
+  //dict_add(id);
 }
 
-let addui;
-let adduitrue;
-
-async function addAnims() {
-      await sleep(5);
-    addsugg = document.getElementById("addsuggestion");    
-    addui = document.getElementById("addui");
-    addsugg.style.left = -500 + "px";
-    addui.style.top = "10000px";
-    while(true) {
-    var height  = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
-    var width  = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
-    var lerptarget = -600;
-    if (addcount > 0) {
-
-      addsugg.style.top = (height - 73) + "px";
-      lerptarget = 0;
-      addcount -= 1;
+function gb_sidebarsearch() {
+  document.getElementById('gb_sidebarsearch').dataset['show'] = "0";
+  document.getElementById('gb_exitsidebarsearch').dataset['show'] = "1";
+  document.getElementById('gi_sidebar').dataset['show'] = "1";
+  document.getElementById('gi_sidebar').value = "";
+  document.getElementById('gi_sidebar').focus();
+  document.getElementById('sidebar').scrollTop = 0;
+  
+}
+function gb_exitsidebarsearch() {
+  document.getElementById('gb_sidebarsearch').dataset['show'] = "1";
+  document.getElementById('gb_exitsidebarsearch').dataset['show'] = "0";
+  document.getElementById('gi_sidebar').dataset['show'] = "0";
+  renderSidebar();
+}
+function gi_sidebar() {
+  renderSidebar();
+}
+function gi_sidebarcheck(elm) {
+  if (elm.value.replaceAll(" ", "") == "" && elm.dataset.show == "1") gb_exitsidebarsearch();
+}
+function renderSidebar() {
+  let filter = null;
+  if (document.getElementById('gi_sidebar').dataset['show'] == "1" && document.getElementById('gi_sidebar').value != "") {
+    filter = document.getElementById('gi_sidebar').value;
+  }
+  let newsort = []
+  let distances = {};
+  let maxdistance = 0;
+  for (const elmr of collectionitems) {
+    if (database.elements[elmr].potential == 0) {
+      continue;
     }
-    addsugg.style.left = (((parseInt(addsugg.style.left) * 9) + lerptarget) / 10)+ "px";
-      
-    var lerptarget2 = height * 1.15;
-    if (adduitrue) {
-      lerptarget2 = 150;
+    if (filter == null) {
+      newsort.push(elmr);
+    } else {
+      let nameelm = database.elements[elmr].name;
+      let distance = jaroWinkler(filter.toLowerCase().replace(" ", ""), nameelm.toLowerCase().replace(" ", ""))
+      distances[elmr] = distance;
+      if (distance > 0.45) {
+        newsort.push(elmr);
+      }
+      if (distance > maxdistance) maxdistance = distance;
     }
-    addui.style.left = ((width / 2) -410) + "px";
-    addui.style.top = (((parseInt(addui.style.top) * 9) + lerptarget2) / 10) + "px";
-    var getElls = document.getElementsByClassName("elementhighlight");
-    for (let ie = 0; ie < getElls.length; ie++) {
-      var ier = parseInt(getElls[ie].getAttribute("data-rotate")) + 1;
-      getElls[ie].style.transform = "rotate(" + ier + "deg)";
-      getElls[ie].setAttribute("data-rotate", ier);
-      var fl = parseFloat(getElls[ie].style.opacity) - 0.002;
-      getElls[ie].style.opacity = "" + fl;
-      if (fl <= 0) {
-        getElls[ie].remove();
+  }
+  document.getElementById("sidebar").innerHTML = "";
+  if (filter != null) {
+    newsort = newsort.sort((a, b) => (distances[b] - distances[a]));
+  }
+  var indcounter = -1;
+  if (maxdistance > 0.75) {
+    indcounter = 0;
+    for (const elmrr of newsort) {
+      if (distances[elmrr] <= 0.75) break;
+      indcounter++;
+    }
+  }
+  var indcounternew = 0;
+  newsort.forEach(addToSidebar => {
+    var addElm = sidebar_add(addToSidebar)
+    if (indcounternew == indcounter) {
+      addElm.dataset['push'] = 1;
+    }
+    indcounternew++;
+  })
+}
+function sidebar_add(id){
+  if (database.elements[id].potential == 0) return;
+  let addHtml = '<div class="sidebarimage" onmousedown="spawnside(this)" style="background-image: url(\'' + spriteDirectory + database.elements[id].stripped + '.png\')"></div><span class="sidebartext">' + database.elements[id].name + '</span>';
+  let addElm = document.createElement("DIV");
+  addElm.dataset["id"] = id;
+  addElm.className = "sidebarelement";
+  if (prevMobileStatus) addHtml = addHtml.replace('onmousedown="spawnside(this)"', 'ontouchstart="spawnside(this, event)"');
+  addElm.innerHTML = addHtml;
+  multGet = (prevMobileStatus) ? 0.7 : 1
+  if (database.elements[id].name.length > 12 * multGet) addElm.childNodes[1].dataset['small'] = "1"
+  if (database.elements[id].name.length > 17 * multGet) addElm.childNodes[1].dataset['small'] = "2"
+  document.getElementById("sidebar").appendChild(addElm)
+  return addElm;
+}
+let dictsortingmode = 0;
+function dictswitchsort() {
+  dictsortingmode++;
+  if (dictsortingmode > 5) dictsortingmode = 0;
+  renderDictionary();
+}
+function gi_menu() {
+  if (openedMenu.includes("dictionary")) {
+    renderDictionary()
+  } else if (openedMenu.includes("hint")) {
+    maxone = {id: -1, distance: 0};
+    var idelmr = 0;
+    let filter = document.getElementById('gi_menu').value;
+    for (const elmr of database.elements) {
+      let nameelm = elmr.name
+      let distance = jaroWinkler(filter.toLowerCase().replace(" ", ""), nameelm.toLowerCase().replace(" ", ""))
+      if (distance > maxone.distance) {
+        maxone = {id: idelmr, distance: distance};
+      }
+      idelmr++;
+    }
+    console.log(maxone);
+    if (maxone.id != -1) {
+      openHint(maxone.id, true);
+      hintHistory = [maxone.id];
+    }
+  }
+}
+function renderDictionary() {
+  let additionsDisclaimer = ["", " (Remaining Potential)", " (Remaining Combinations)", " (Depth)", " (Alphabetical Order)", " (ID)"]
+  document.getElementById('dictionaryDisclaimer').innerText = "You have found " + collectionitems.length + "/8211 items and " + collection.length + "/20262 recipes." + additionsDisclaimer[dictsortingmode];
+  if (dictsortingmode > 0) document.getElementById('dictionaryDisclaimer').dataset['font'] = "1";
+  newsort = [...collectionitems];
+  let elms = database.elements;
+  if (document.getElementById("gi_menu").value != "") {
+    console.log("Trying.")
+    let filter = document.getElementById('gi_menu').value;
+    let newsortset = []
+    let distances = {};
+    for (const elmr of collectionitems) {
+      let nameelm = database.elements[elmr].name;
+      let distance = jaroWinkler(filter.toLowerCase().replace(" ", ""), nameelm.toLowerCase().replace(" ", ""))
+      distances[elmr] = distance;
+      if (distance > 0.75) {
+        newsortset.push(elmr);
       }
     }
-      
-    
-      
-    await sleep(10);
-}
-}
-
-
-
-function demat(dec) {
-  return dec;
-}
-
-
-function exitadd() {
-  addcount = 0;
-}
-
-function openadd() {
-  updateings();
-  adduitrue = true;
-  addcount = 0;
-}
-
-function exitaddui() {
-  adduitrue = false;
-}
-
-function submit() {
-  var iname = document.getElementById("auiname");
-  var ilore = document.getElementById("auilore");
-  var iauthor = document.getElementById("auiauthor");
-  var imaterial = document.getElementById("auiref");
-  var ipassword = document.getElementById("auipassword");
-  
-  if (iname.value == "" || iauthor.value == "") {
-    alert("Put a name and an author!");
-    return;
+    newsort = newsortset.sort((a, b) => (distances[b] - distances[a]));
   }
-  
-  var stripname = strip(iname.value);
-  let itemIndex = fulljson.findIndex(i => strip(i.name) == stripname);
-  
-  if (itemIndex != -1) {
-    alert("Item name already exists");
-    return;
-  }
-
-  fetchbody = joinSubmission(iname.value, ilore.value, iauthor.value, imaterial.value, ipassword.value);
-  if (imaterial.value == "") {
-    fetchbody = joinSubmission(iname.value, ilore.value, iauthor.value, canvas.toDataURL(), ipassword.value);
-  } 
-  refetch = true;
-  refetchjson();
-  
-  attemptrefetch();
-  
-  
-  adduitrue = false;
-}
-
-function updateings() {
-  var splitRecipeText = addrecipe.split("-");
-  var splitRecipe0 = parseInt(splitRecipeText[0]) - 1;
-  var splitRecipe1 = parseInt(splitRecipeText[1]) - 1;
-  document.getElementById("ing1img").setAttribute("src", demat(fulljson[splitRecipe0].material));
-  document.getElementById("ing2img").setAttribute("src", demat(fulljson[splitRecipe1].material));
-  document.getElementById("ing1txt").textContent = (fulljson[splitRecipe0].name);
-  document.getElementById("ing2txt").textContent = (fulljson[splitRecipe1].name);
-}
-function strip(text) {
-  return text.toLowerCase().replace(/[^a-z]/g, "");
-}
-
-function joinSubmission(name, lore, author, material, password) {
-  let date = new Date();
-  let now = date.toLocaleString('en-US');
-  var splitRecipeText = addrecipe.split("-");
-  var splitRecipe0 = parseInt(splitRecipeText[0]) - 1;
-  var splitRecipe1 = parseInt(splitRecipeText[1]) - 1;
-  var inglevel = parseInt(fulljson[splitRecipe0].inglevel) + parseInt(fulljson[splitRecipe1].inglevel);
-  var intendedmaterial = material;
-  
-  return fixexploit(name) + "^" + addrecipe.replace("-", ":") + "^" + fixexploit(intendedmaterial) + "^" + fixexploit(lore) + "^" + fixexploit(author) + "^" + inglevel + "^" + now + "^" + fixexploit(password);
-}
-
-function fixexploit(st) {
-  return st.replace("^", "").replace("{", "").replace("}","").replace('"', '');
-}
-
-
-
-
-var canvas;
-var context;
-
-var lastPos;
-var canvascolor;
-var canvasstroke;
-var canvastype;
-var mouseDown = false;
-var fillpaints;
-var actioncounter;
-var undoactioncount;
-var redoactioncount;
-
-function getMousePos(canvas, evt) {
-    var rect = canvas.getBoundingClientRect();
-    
-    return {
-      x: evt.clientX - rect.left,
-      y: evt.clientY - rect.top
-    };
-}
-
-function pickcolor(elemt) {
-  canvascolor = elemt.getAttribute("data-color");
-  document.getElementById("customcolorpick").value = canvascolor;
-}
-
-function picksize(elemt) {
-  canvasstroke = parseInt(elemt.getAttribute("data-size"));
-}
-
-
-
-//canvas shit
-function init() {
-  
-  var ismobile = false;
-  if(/(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|ipad|iris|kindle|Android|Silk|lge |maemo|midp|mmp|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows (ce|phone)|xda|xiino/i.test(navigator.userAgent) 
-    || /1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i.test(navigator.userAgent.substr(0,4))) { 
-    ismobile = true;
-  }
-  if (ismobile) {
-    window.location.replace("http://laugc.glitch.me/mobile");
-  }
-  
-  canvascolor = "#FFFFFF";
-  canvasstroke = 1;
-  canvastype = 1;
-  picktype(document.getElementById("brush"));
-  canvas = document.getElementById("can");
-  context = canvas.getContext("2d");
-  undoactioncount = [];
-  redoactioncount = [];
-  UndoCanvas.enableUndo(context);
-  
-  document.body.onmousedown = function() { 
-    fillpaints = [];
-    mouseDown = true;
-    if (canvastype == 1 || canvastype == 2) {
-      actioncounter = 0; 
-    }
-  }
-  document.body.onmouseup = function() {
-    if (canvastype == 1 || canvastype == 2) {
-      if (actioncounter > 0) {
-        undoactioncount.push(actioncounter);
-        redoactioncount = [];
-        actioncounter = 0;
+  if (dictsortingmode == 1) {
+    usedpotentials = {};
+    collection.forEach(colladd => {
+      let collsplit = colladd.split(".").map(Number);
+      if (usedpotentials[collsplit[0]] == undefined) {
+        usedpotentials[collsplit[0]] = 0
       }
-    }
-    if (adduitrue) {
-      if (fillpaints.length > 0) {
-        fillpaints.push(fillpaints[0]);
-        context.beginPath();
-        context.lineWidth = 3;
-        context.lineJoin="round";
-        context.lineCap="round";
-        context.strokeStyle = canvascolor;
-        context.fillStyle = canvascolor;
-        context.moveTo(fillpaints[0].x, fillpaints[0].y);
-        for(let ia = 1; ia < fillpaints.length; ia++) {
-          context.lineTo(fillpaints[ia].x, fillpaints[ia].y);
+      usedpotentials[collsplit[0]] += 1;
+      if (collsplit[0] != collsplit[1]) {
+        if (usedpotentials[collsplit[1]] == undefined) {
+          usedpotentials[collsplit[1]] = 0
         }
-        actioncounter += 2;
-        undoactioncount.push(actioncounter);
-        redoactioncount = [];
-        actioncounter = 0;
-        context.fill();
-        context.stroke();
+        usedpotentials[collsplit[1]] += 1;
+      }
+    })
+    newsort = newsort.sort((a, b) => (elms[b].potential - (usedpotentials[b]||0)) - (elms[a].potential - (usedpotentials[a]||0)));
+  }
+  if (dictsortingmode == 2) {
+    usedrecipes = {};
+    collection.forEach(colladd => {
+      if (usedrecipes[database.recipes[colladd]] == undefined) {
+        usedrecipes[database.recipes[colladd]] = 0
+      }
+      usedpotentials[database.recipes[colladd]] += 1;
+    })
+    newsort = newsort.sort((a, b) => (elms[b].recipes - (usedrecipes[b]||0)) - (elms[a].recipes - (usedrecipes[a]||0)));
+  }
+  if (dictsortingmode == 3) {
+    newsort = newsort.sort((a, b) => (elms[b].depth - elms[a].depth));
+  }
+  if (dictsortingmode == 4) {
+    newsort = newsort.sort((a, b) => (elms[a].name.localeCompare(elms[b].name)));
+  }
+  if (dictsortingmode == 5) {
+    newsort = newsort.sort((a, b) => (a - b));
+  }
+  
+  document.getElementById("dictionaryContainer").innerHTML = "";
+  newsort.forEach(addToSidebar => {
+    dict_add(addToSidebar)
+  })
+}
+function renderFinalItems() {
+  let elms = database.elements;
+  newsort = [...totaldepths].filter(jj => database.elements[jj].potential == 0);
+  
+  document.getElementById("finalitemsContainer").innerHTML = "";
+  let foundstatus = 0;
+  newsort.forEach(addToSidebar => {
+    foundstatus = 1;
+    if (collectionitems.includes(addToSidebar)) {
+      foundstatus = 0;
+      var collectionCounter = 0;
+      collection.forEach(colladd => {
+        if (database.recipes[colladd] == addToSidebar) {
+          collectionCounter += 1;
+        }
+      })
+      if (collectionCounter == database.elements[addToSidebar].recipes) {
+        foundstatus = 2;
       }
     }
-    mouseDown = false;
+    finalitems_add(addToSidebar, foundstatus)
+  })
+}
+function dict_add(id) {
+  let addElm = document.createElement("DIV");
+  addElm.onmousedown = function() {
+    openDict(id, true);
+  };
+  addElm.ontouchstart = function() {
+    openDict(id, true);
+  };
+  addElm.className = "dictItem";
+  addElm.style.backgroundImage = "url('" + spriteDirectory + database.elements[id].stripped + ".png')";
+  document.getElementById("dictionaryContainer").appendChild(addElm)
+}
+function finalitems_add(id, found) {
+  let addElm = document.createElement("DIV");
+  addElm.onmousedown = function() {
+    openDict(id, true);
+  };
+  addElm.ontouchstart = function() {
+    openDict(id, true);
+  };
+  addElm.className = "dictItem";
+  if (found == 0) addElm.dataset['found'] = "1";
+  if (found == 2) addElm.dataset['foundall'] = "1";
+  if (found == 1) {
+    addElm.dataset['notfound'] = "1";
+  } else {
+    addElm.style.backgroundImage = "url('" + spriteDirectory + database.elements[id].stripped + ".png')";
   }
-  document.body.onmousemove = function(event) {
-    lastPos = getMousePos(canvas, event);
-  }
-  
-  if (getCookie("colorc") == "") {
-    setCookie("colorc", "#FFFFFF,#FFDD56,#FF984F,#FF2F4F,#7CFF30,#30FFA2,#30D5FF,#3041FF,#A200FF,#8E451B,#8C8C8C,#000000");
-  }
-  var gc = getCookie("colorc").split(",");
-  for (let ie = 0; ie < gc.length; ie++) {
-    addColorPick(gc[ie]);
-  }
-  
-  var pick = document.createElement("INPUT");
-  pick.setAttribute("onchange", "customcolorchange(this)");
-  pick.setAttribute("type", "color");
-  pick.setAttribute("id", "customcolorpick")
-  pick.setAttribute("class", "customcolorpick");
-  document.getElementById("colorcollection").appendChild(pick);
-  document.getElementById("customcolorpick").value = canvascolor;
-  
+  document.getElementById("finalitemsContainer").appendChild(addElm)
 }
 
-function addColorPick(color) {
-  var pick = document.createElement("INPUT");
-  pick.setAttribute("onclick", "pickcolor(this)");
-  pick.setAttribute("type", "image");
-  pick.setAttribute("class", "colorpick");
-  pick.setAttribute("style", "background-color:" + color + ";");
-  pick.setAttribute("data-color", color);
-  document.getElementById("colorcollection").appendChild(pick);
+let prevMousePosition = {x: 0, y: 0}
+let totalMouseOffsetDragging = 0;
+function checkCollision(element1HitboxWidth, element1HitboxHeight, element2HitboxWidth, element2HitboxHeight, element1PositionX, element1PositionY, element2PositionX, element2PositionY) {
+  const element1Left = element1PositionX - element1HitboxWidth / 2;
+  const element1Right = element1PositionX + element1HitboxWidth / 2;
+  const element1Top = element1PositionY - element1HitboxHeight / 2;
+  const element1Bottom = element1PositionY + element1HitboxHeight / 2;
+
+  const element2Left = element2PositionX - element2HitboxWidth / 2;
+  const element2Right = element2PositionX + element2HitboxWidth / 2;
+  const element2Top = element2PositionY - element2HitboxHeight / 2;
+  const element2Bottom = element2PositionY + element2HitboxHeight / 2;
+
+  return !(element1Right < element2Left || element1Left > element2Right || element1Bottom < element2Top || element1Top > element2Bottom);
 }
 
-var fillpainti = 0;
-
-function move(evt) {
-  var pos = getMousePos(canvas, evt);
-  if (mouseDown) {
-    if (canvastype == 1) {
-      context.globalCompositeOperation="source-over";
-      context.beginPath();
-      context.moveTo(lastPos.x, lastPos.y);
-      context.lineTo(pos.x, pos.y);
-      context.strokeStyle = canvascolor;
-      context.lineWidth = canvasstroke;
-      context.lineJoin="round";
-      context.lineCap="round";
-      context.stroke();
-      actioncounter++;
-    }
-    if (canvastype == 2) {
-      context.globalCompositeOperation='destination-out';
-      context.beginPath();
-      context.fill();
-      context.lineWidth=canvasstroke;
-      context.moveTo(lastPos.x, lastPos.y);
-      context.lineTo(pos.x, pos.y);
-      context.lineJoin="round";
-      context.lineCap="round";
-      context.stroke();
-      actioncounter += 2;
-    }
-    if (canvastype == 4) {
-      fillpainti++;
-      if (fillpainti % 5 == 0) {
-        
-      context.globalCompositeOperation="source-over";
-      context.beginPath();
-      context.moveTo(lastPos.x, lastPos.y);
-      context.lineTo(pos.x, pos.y);
-      context.strokeStyle = "#0094FF";
-      context.lineWidth = 2;
-      context.lineJoin="round";
-      context.lineCap="round";
-      context.stroke();
-      actioncounter++;
+function mobileHoverCheck() {
+  let gameElms = document.getElementsByClassName("gameelement");
+  let currentlyDraggingCoords = [];
+  let sizeCurrentlyDragging;
+  if (currentlyDragging != null) {
+    currentlyDraggingCoords = [parseInt(currentlyDragging.style.left), parseInt(currentlyDragging.style.top)];
+    sizeCurrentlyDragging = [currentlyDragging.childNodes[2].clientWidth, currentlyDragging.childNodes[2].clientHeight];
+  }
+  let hovering = false;
+  for (const gameElm of gameElms) {
+    if (gameElm.dataset['id'] != undefined && gameElm.dataset['small'] == "0" && gameElm != currentlyDragging) {
+      if (gameElm.dataset['hoversave'] == "1" && hovering) {
+        hoverElement(gameElm.childNodes[2], false);
+        continue;
       }
-      fillpaints.push(pos);
+      let coords = [parseInt(gameElm.style.left), parseInt(gameElm.style.top)];
+      let size = [gameElm.childNodes[2].clientWidth, gameElm.childNodes[2].clientHeight];
+      let collision = false;
+      if (currentlyDragging != null) {
+        collision = checkCollision(size[0], size[1], sizeCurrentlyDragging[0], sizeCurrentlyDragging[1], coords[0], coords[1], currentlyDraggingCoords[0], currentlyDraggingCoords[1])
+      }
+      //console.log(gameElm.dataset['id'], collision);
+      if ((gameElm.dataset['hoversave'] == undefined || gameElm.dataset['hoversave'] == "0") && collision) {
+        hoverElement(gameElm.childNodes[2], true);
+        hovering = true;
+      } else if (gameElm.dataset['hoversave'] == "1" && !collision) {
+        hoverElement(gameElm.childNodes[2], false);
+      }
     }
   }
 }
-//canvas click
-
-function hexToRgb(hex) {
-  var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-  return result ? {
-    r: parseInt(result[1], 16),
-    g: parseInt(result[2], 16),
-    b: parseInt(result[3], 16)
-  } : null;
+let gtshint = 999999999999999999999999999999999999999999999999999999;
+let gtsRemove = false;
+let gtsIgnore = false;
+function gts_hint() {
+  gtshint = Date.now();
+  gtsRemove = true;
+}
+function gte_hint() {
+  if (gtsIgnore) {
+    gtsIgnore = false;
+    return;
+  }
+  console.log(Date.now() - gtshint);
+  if (Date.now() - gtshint > 500 && gtsRemove) {
+    gb_exithint();
+  } else {
+    gb_hint();
+  }
+  gtsRemove = false;
+  gtsIgnore = false;
+}
+function loop() {
+  let changeD = 0;
+  if (prevMobileStatus) mobileHoverCheck();
+  if (Date.now() - gtshint > 500 && gtsRemove) {
+    gb_exithint();
+    gtsRemove = false;
+    gtsIgnore = true;
+  }
+  if (currentlyDragging != null) {
+    let mouseOffset = {x: mousePosition.x - prevMousePosition.x, y: mousePosition.y - prevMousePosition.y};
+    changeD = Math.sqrt(mouseOffset.x*mouseOffset.x + mouseOffset.y*mouseOffset.y);
+    totalMouseOffsetDragging += changeD;
+    prevMousePosition = {x: mousePosition.x, y: mousePosition.y};
+    let secondsPassed = (Date.now() - currentlyDraggingCounter) / 1000;
+    if (secondsPassed > 0.5 && totalMouseOffsetDragging < 20) {
+      totalMouseOffsetDragging = 0;
+      openDict(parseInt(currentlyDragging.dataset.id), true);
+      stopDrag();
+      return;
+    }
+    let viewportWidth  = document.documentElement.clientWidth / zoomFactor;
+    let viewportHeight = document.documentElement.clientHeight / zoomFactor;
+    currentlyDragging.style.left = (parseInt(mousePosition.x - dragOffset.x)) + "px";
+    currentlyDragging.style.top = (parseInt(mousePosition.y - dragOffset.y)) + "px";
+    if (parseInt(mousePosition.x - dragOffset.x) > (viewportWidth) - (300)) {
+      if (currentlyDragging.dataset["small"] == "0") {
+        currentlyDragging.dataset["small"] = "1"
+      }
+    } else if (currentlyDragging.dataset["small"] == "1") {
+      if (bringBackSidebar != null) bringBackSidebar.dataset['disappear'] = "0";
+        currentlyDragging.dataset["small"] = "0"
+    }
+    if (currentlyHovering != null) {
+      combineCircle.dataset["show"] = "1";
+      consolelog(currentlyHovering.parentNode)
+      consolelog((parseInt(mousePosition.x - dragOffset.x)), parseInt(currentlyHovering.parentNode.style.left))
+      var lerpGetLeft = (((parseInt(currentlyDragging.style.left) + (parseInt(currentlyHovering.parentNode.style.left)))/ 2) - 174);
+      var lerpGetTop = (((parseInt(currentlyDragging.style.top) + (parseInt(currentlyHovering.parentNode.style.top)))/ 2) - 174);
+      consolelog("lerps" + lerpGetLeft +  "," + lerpGetTop)
+      combineCircle.style.left = ((parseInt(combineCircle.style.left) * 0.9) + (lerpGetLeft * 0.1)) + "px"
+      combineCircle.style.top = ((parseInt(combineCircle.style.top) * 0.9) + (lerpGetTop * 0.1)) + "px"
+      if (waitTimeCC != null && performance.now() - waitTimeCC > 350) {
+        combineCircle.style.left = lerpGetLeft + "px";
+        combineCircle.style.top = lerpGetTop + "px";
+      }
+      waitTimeCC = performance.now()
+    } else {
+      distanceLerp = 0;
+      combineCircle.dataset["show"] = "0";
+      currentlyDragging.dataset["comb"] = "0";
+    }
+    console.log(changeD);
+    if (changeD != 0) {
+      console.log("saving board");
+      attemptSaveBoard();
+    }
+  } else {
+    distanceLerp = 0;
+  }
+  if (bringBack.length > 0) {
+    removeId = null;
+  }
+  prevMousePosition = {x: mousePosition.x, y: mousePosition.y};
+}
+let discoveryMenu = null;
+function openDiscoveryMenu(id) {
+  discoveryMenu = id;
+  document.getElementById("newDiscovery").dataset["shown"] = "1";
+  document.getElementById("newDiscoveryTitle").innerText = database.elements[id].name;
+  document.getElementById("newDiscoveryDescription").innerText = "'" + database.elements[id].description + "'";
+  document.getElementById("newDiscoveryImage").style.backgroundImage = "url('" + spriteDirectory + database.elements[id].stripped + ".png')";
+}
+function closeDiscoveryMenu() {
+  discoveryMenu = null;
+  document.getElementById("newDiscovery").dataset["shown"] = "0";
 }
 
-async function draw(evt) {
-  if (canvastype == 3) {
-    actioncounter = 0;
-    var posclick = roundPos(getMousePos(canvas, evt));
-    var pl = [posclick];
-    var epl = [];
-    var p = getPixel(Math.floor(posclick.x), Math.floor(posclick.y));
-    var hexcheck = hexToRgb(canvascolor);
-    var canvascolorsave = canvascolor;
+function spawnitem(id, posx, posy, smaller) {
+  let innerHtmlItem = '<div class="gamecircle"></div><div class="gameimage" style="background-image: url(\'%^%%1%.png\')"></div><div class="gamehitbox" onmouseover="hoverElement(this, true)" onmouseout="hoverElement(this, false)" onmousedown="gameElmPress(this)"></div>'
+  let htmlItem = document.createElement("DIV");
+  htmlItem.className = "gameelement";
+  htmlItem.dataset['id'] = id;
+  htmlItem.dataset['small'] = "1";
+  htmlItem.style.left = posx + "px";
+  htmlItem.style.top = posy + "px";
+  if (smaller == true) htmlItem.dataset["small"] = "2";
+  if (prevMobileStatus) innerHtmlItem = innerHtmlItem.replace('onmousedown="gameElmPress(this)"', 'ontouchstart="gameElmPress(this, event)"');
+  htmlItem.innerHTML = innerHtmlItem.replace("%1%", database.elements[id].stripped).replace("%^%", spriteDirectory);
+  document.getElementById("gamecontainer").appendChild(htmlItem)
+  return htmlItem
+}
+async function hoverElement(elm, status) {
+  if (combining) return;
+  if (currentlyDragging != null && currentlyDragging == elm) return; 
+  let circleElm = elm.parentNode;
+  circleElm.dataset["hoversave"] = status ? "1" : "0";
+  var rndid = Math.round(Math.random() * 1000)
+  consolelog("hover", rndid)
+  if (status) {
+    currentlyHovering = elm;
+    if (currentlyDragging == null) {
+      consolelog("hover move", rndid)
+      circleElm.dataset['originalpos'] = getElementPosition(elm) + "";
+      consolelog("movin to last sibling")
+      moveToLastSibling(circleElm);
+    }
+  } else {
+    if (currentlyHovering == elm) {
+      if (currentlyDragging != null && currentlyDragging != elm) {
+        bringBack.push(elm)
+      }
+      currentlyHovering = null;
+    }
+    elm.parentNode.dataset["comb"] = "0"
+    consolelog("hover move back", rndid)
+    if (currentlyDragging == null) {
+      moveToOriginalPosition(circleElm, parseInt(circleElm.dataset['originalpos']));
+      await sleep(1)
+    }
+  }
+  await sleep(0)
+  circleElm.dataset["hovered"] = status ? 1 : 0
+  if (status) {
+    if (currentlyDragging != elm && currentlyDragging != null) {
+      circleElm.dataset["comb"] = "1";
+      currentlyDragging.dataset["comb"] = "1";
+    }
+  }
+}
+
+async function combineGameElements(on, below) {
+  combining = true;
+  combineCircle.dataset["show"] = "0";
+  on.dataset["comba"] = "2";
+  below.dataset["comba"] = "2";
+  let id1 = parseInt(on.dataset["id"]);
+  let id2 = parseInt(below.dataset["id"]);
+  if (id1 > id2) {
+    let temp = id1;
+    id1 = id2;
+    id2 = temp;
+  }
+  consolelog("COMBINE!", id1, id2)
+  let combinationResult = database['recipes'][id1 + '.' + id2];
+  consolelog(combinationResult);
+  //if (combinationResult == 4) combinationResult = undefined;
+  if (combinationResult == undefined) {
+    on.dataset["comba"] = "0";
+    on.dataset["comb"] = "0";
+    on.dataset["hovered"] = "0";
+    on.dataset["failed"] = "1";
+    below.dataset["comba"] = "0";
+    below.dataset["comb"] = "0";
+    below.dataset["hovered"] = "0";
+    below.dataset["failed"] = "1";
+    playSound("sfx_nocombination");
+    await sleep(200)
+    on.dataset["failed"] = "0";
+    below.dataset["failed"] = "0";
+    combining = false;
+  } else {
+    playSound("sfx_combining");
+    hoverElement(below, false);
+    currentlyHovering = null;
+    let interpolated = {x: (parseInt(on.style.left) + parseInt(below.style.left))/2, y: (parseInt(on.style.top) + parseInt(below.style.top))/2};
+    for (let idt = 0; idt < 75; idt++) {
+      on.style.left = ((parseInt(on.style.left) * 0.85) + (interpolated.x * 0.15)) + "px";
+      on.style.top = ((parseInt(on.style.top) * 0.85) + (interpolated.y * 0.15)) + "px";
+      below.style.left = ((parseInt(below.style.left) * 0.85) + (interpolated.x * 0.15)) + "px";
+      below.style.top = ((parseInt(below.style.top) * 0.85) + (interpolated.y * 0.15)) + "px";
+      await sleep(4)
+    }
+    on.remove();
+    below.remove();
+    combining = false;
+    newDiscovery = !collection_checkItem(combinationResult);
+    newRecipe = !collection_checkRecipe(id1, id2);
+    itemIsFinal = (database.elements[combinationResult].potential == 0)
+    let spitem = spawnitem(combinationResult, interpolated.x, interpolated.y, true);
+    if (!newDiscovery && newRecipe) {
+      sparks(spitem);
+    }
+    if (newRecipe) {
+      collection_addRecipe(id1, id2);
+    }
+    await sleep(100)
+    playSound("sfx_itemmade", 27);
+    spitem.dataset["small"] = "0";
+    spitem.dataset["newitem"] = "1";
+    currentlyHovering = null;
+    if (newDiscovery) {
+      playSound("sfx_newitem2");
+      addNewItem(combinationResult);
+      openDiscoveryMenu(combinationResult)
+      for (let iw = 0; iw < 500; iw++) {
+        await sleep(5);
+        if (discoveryMenu == null) {
+          break;
+        }
+      }
+      if (itemIsFinal) {
+        await sleep(700)
+        destroyElm(spitem, combinationResult)
+      }
+    } else {
+      if (itemIsFinal) {
+        await sleep(1500)
+        destroyElm(spitem, combinationResult)
+      }
+    }
+  }
+}
+async function sparks(elm) {
+  var partyElm = document.createElement("DIV");
+  partyElm.style.position = "absolute";
+  partyElm.style.left = (parseInt(elm.style.left) - 13) + "px";
+  partyElm.style.top = (parseInt(elm.style.top) - 8) + "px";
+  document.getElementById("gamecontainer").appendChild(partyElm)
+  party.sparkles(partyElm, {zIndex: -1});
+  await sleep(2000);
+  partyElm.remove()
+}
+function startDrag(elm, ignore, ignoredoubleclick) {
+  let secondsPassed = (Date.now() - doubleclicktimer) / 1000;
+  if (secondsPassed < 0.185 && ignoredoubleclick != true) {
+    console.log("double click")
+    //spawnitem(elm.dataset.id, parseInt(elm.style.left), parseInt(elm.style.top))
+    dupeItem(elm);
+    saveBoard()
+    return;
+  }
+  playSound("sfx_dragstart");
+  totalMouseOffsetDragging = 0;
+  currentlyHovering = null;
+  currentlyDraggingCounter = Date.now();
+  if (currentlyDragging != null) stopDrag()
+  elm.dataset['dragging'] = "1"
+  hoverElement(elm.childNodes[0], false)
+  currentlyDragging = elm;
+  moveToLastSibling(elm)
+  if (ignore != true) {
+    dragOffset = {x: mousePosition.x - parseInt(elm.style.left), y: mousePosition.y - parseInt(elm.style.top)}
+  }
+}
+async function dupeItem(elm) {
+  let viewportWidth  = document.documentElement.clientWidth;
+  playSound("sfx_dupe")
+  console.log(parseInt(elm.style.left), (viewportWidth) - 400)
+  let spitem = spawnitem(elm.dataset.id, parseInt(elm.style.left) - 90, parseInt(elm.style.top) + 45, true);
+  await sleep(100)
+  spitem.dataset["small"] = "0";
+  spitem.dataset["newitem"] = "1";
+}
+function gameElmPress(elm, event) {
+  if (event != undefined) {
+    console.log(event);
+    var touchLocation = event.targetTouches[0];
+    mousePosition.x = touchLocation.pageX / zoomFactor;
+    mousePosition.y = touchLocation.pageY / zoomFactor;
+    console.log(mousePosition);
+  }
+  console.log("yes");
+  consolelog(elm.parentNode.dataset['small'])
+  if (elm.parentNode.dataset['small'] == "0") {
+    startDrag(elm.parentNode, false);
+  }
+}
+async function destroyElm(elm, final, instant) {
+  elm.dataset["small"] = "2";
+  elm.childNodes[2].dataset["disable"] = "1";
+  if (final == -1) {
+    elm.dataset["finalitem"] = "2";
+    if (instant != true) await sleep(700);
+    elm.remove();
+    return;
+  }
+  if (final != undefined) {
+    elm.dataset["finalitem"] = "1";
+    await sleep(200);
+    party.resolvableShapes["finalItem" + final] = `<img height="50px" width="50px" src="` + spriteDirectory + database.elements[final].stripped + `.png"/>`;
+    //rectsrc = party.sources.rectSource([parseInt(elm.style.left), parseInt(elm.style.top)]);
+    var partyElm = document.createElement("DIV");
+    partyElm.style.position = "absolute";
+    partyElm.style.left = (parseInt(elm.style.left) - 23) + "px";
+    partyElm.style.top = (parseInt(elm.style.top) - 12) + "px";
+    document.getElementById("gamecontainer").appendChild(partyElm)
+   /* party.confetti(partyElm,{
+      shapes: ["finalItem" + final],
+      debug: false,
+      gravity: 1800,
+      zIndex: 5,
+      count: 15
+    }); */
+    party.scene.current.createEmitter({
+      emitterOptions: {
+        loops: 1,
+        useGravity: false,
+        modules: [
+          new party.ModuleBuilder()
+            .drive("size")
+            .by((t) => (t < 0.2 ? t * 5 : 1))
+            .build(),
+          new party.ModuleBuilder()
+            .drive("opacity")
+            .by((t) => Math.max(0, 1 - t))
+            .build(),
+        ],
+      },
+      emissionOptions: {
+        rate: 0,
+        bursts: [{ time: 0, count: party.variation.skew(10, 5) }],
+        sourceSampler: party.sources.dynamicSource(partyElm),
+        angle: party.variation.range(0, 360),
+        initialSpeed: party.variation.range(50, 500), // Different speeds for each particle
+        initialColor: party.variation.gradientSample(
+          party.Gradient.simple(party.Color.fromHex("#ffa68d"), party.Color.fromHex("#fd3a84"))
+        ),
+        lifetime: 0.5,
+      },
+      rendererOptions: {
+        count: 15,
+        zIndex: 5,
+        shapeFactory: "finalItem" + final,
+        applyLighting: undefined,
+      },
+    });
     
-    var ic = 0;
-    if (Math.abs(p[0] - hexcheck.r) < 10 && Math.abs(p[1] - hexcheck.g) < 10 && Math.abs(p[2] - hexcheck.b) < 10) {
-      ic = 50001;
+    await sleep(100);
+    elm.remove();
+    await sleep(700);
+    partyElm.remove();
+  } else {
+    await sleep(2000);
+    elm.remove();
+  }
+}
+function stopDrag() {
+  consolelog("stopped dragging")
+  if (bringBackSidebar != null) bringBackSidebar.dataset['disappear'] = "0";
+  if (currentlyDragging != null) {
+    playSound("sfx_dragend");
+    let secondsPassed = (Date.now() - currentlyDraggingCounter) / 1000;
+    currentlyDraggingCounter = 9999999999999999999999999999999999999999;
+    if (secondsPassed < 0.185) {
+      doubleclicktimer = Date.now();
     }
-    while(adduitrue) {
-      ic++;
-      var gp = pl[0];
-      context.fillStyle = canvascolorsave;
-      context.fillRect(gp.x, gp.y, 1, 1 );
-      actioncounter++;
-      check(gp.x + 1, gp.y);
-      check(gp.x, gp.y + 1);
-      check(gp.x - 1, gp.y);
-      check(gp.x, gp.y - 1);
-      
-      if (pl.length == 1) {
+
+    if (currentlyHovering != null) {
+      combineGameElements(currentlyDragging, currentlyHovering.parentNode)
+    }
+    if (currentlyDragging.dataset["small"] == "0") currentlyDragging.dataset["small"] = "0";
+    if (currentlyDragging.dataset["small"] == "1") {
+      destroyElm(currentlyDragging);
+    }
+    currentlyDragging.dataset["comb"] = "0";
+    currentlyDragging.dataset['dragging'] = "0"
+  }
+  currentlyDragging = null;
+}
+
+function spawnside(elm, event) {
+  if (event != undefined) {
+    var touchLocation = event.targetTouches[0];
+    mousePosition.x = touchLocation.pageX / zoomFactor;
+    mousePosition.y = touchLocation.pageY / zoomFactor;
+    console.log(mousePosition);
+  }
+  let id = parseInt(elm.parentNode.dataset.id);
+  consolelog(elm.parentNode, id)
+  elm.dataset['disappear'] = "1"
+  bringBackSidebar = elm;
+  offsetElm = getOffset(elm.parentNode);
+  dragOffset = {x: mousePosition.x - offsetElm.x, y: mousePosition.y - offsetElm.y}
+  consolelog(dragOffset)
+  let spawnedItem = spawnitem(id, offsetElm.x, offsetElm.y);
+  startDrag(spawnedItem, true, true);
+  dragOffset = {x: mousePosition.x - offsetElm.x, y: mousePosition.y - offsetElm.y}
+}
+function getOffset(el) {
+  const rect = el.getBoundingClientRect();
+  return {
+    x: rect.left + window.scrollX + 50,
+    y: rect.top + window.scrollY + 50
+  };
+}
+function moveToLastSibling(element) {
+  if (!element.parentNode) {
+    return;
+  }
+  
+  element.parentNode.appendChild(element);
+}
+function moveToOriginalPosition(element, originalPosition) {
+  if (!element.parentNode || originalPosition < 0) {
+    return;
+  }
+  
+  const siblings = element.parentNode.children;
+  
+  if (originalPosition < siblings.length) {
+    element.parentNode.insertBefore(element, siblings[originalPosition]);
+  } else {
+    element.parentNode.appendChild(element);
+  }
+}
+function getElementPosition(element) {
+  if (!element.parentNode) {
+    return -1;
+  }
+  
+  const siblings = element.parentNode.children;
+  return Array.from(siblings).indexOf(element);
+}
+function consolelog(msg) {
+  //consolelog(msg)
+}
+
+async function gb_clean() {
+  if (document.getElementById("gb_clean").dataset["clean"] == "1") {
+    return;
+  }
+  playSound("sfx_nocombination");
+  document.getElementById("gb_clean").dataset["clean"] = "1";
+  var elms = document.getElementsByClassName("gameelement");
+  for (const elmr of elms) {
+    if (elmr.dataset.id != undefined) {
+      destroyElm(elmr, -1)
+    }
+  }
+  await sleep(600);
+  saveBoard();
+  document.getElementById("gb_clean").dataset["clean"] = "0";
+}
+function gb_dict() {
+  renderDictionary();
+  openMenu("dictionary");
+}
+function gb_finalitems() {
+  renderDictionary();
+  openMenu("finalitems");
+}
+
+function openDict(id, plays) {
+  consolelog("clicked" + id)
+  if (openedMenu.includes("iteminfo")) {
+   exitMenu(false, true);
+  }  
+  document.getElementById("iteminfoItem").style.backgroundImage = "url('" + spriteDirectory + database.elements[id].stripped + ".png')";
+  document.getElementById("iteminfoItem").dataset['hidden'] = (collectionitems.includes(id)) ? "0" : "1";
+  document.getElementById("iteminfoDisclaimer").innerText = database.elements[id].name;
+  document.getElementById("iteminfoDescription").innerText = database.elements[id].description;
+  document.getElementById("iteminfoCombinations").innerHTML = "";
+  document.getElementById("iteminfoPotentials").innerHTML = "";
+  document.getElementById("iteminfoRecipeDepth").innerText = "Recipe Depth: " + database.elements[id].depth;
+  document.getElementById("iteminfoID").innerText = "ID: " + id;
+  var collectionCounter = 0;
+  var potentialCounter = 0;
+  collection.forEach(colladd => {
+    let collsplit = colladd.split(".").map(Number);
+    if (database.recipes[colladd] == id) {
+      let infocombelm = document.createElement("div");
+      infocombelm.className = "iteminfoCombination";
+      var innercomb = '<div class="iteminfoCombinationItem"><div class="iteminfoCombinationImg" onclick="openDict(' + collsplit[0] + ')" style="background-image: url(\'' + spriteDirectory + database.elements[collsplit[0]].stripped +'.png\')"></div><p class="iteminfoCombinationText">' + database.elements[collsplit[0]].name + '</p></div><p class="iteminfoCombinationText">+</p><div class="iteminfoCombinationItem"><div class="iteminfoCombinationImg" onclick="openDict(' + collsplit[1] + ')" style="background-image: url(\'' + spriteDirectory + database.elements[collsplit[1]].stripped + '.png\')"></div><p class="iteminfoCombinationText">' + database.elements[collsplit[1]].name + '</p></div><p class="iteminfoCombinationText">=</p><div class="iteminfoCombinationItem"><div class="iteminfoCombinationImg" style="background-image: url(\'' + spriteDirectory + database.elements[id].stripped + '.png\')"></div><p class="iteminfoCombinationText">' + database.elements[id].name + '</p></div>'
+      consolelog(innercomb)
+      infocombelm.innerHTML = innercomb;
+      document.getElementById("iteminfoCombinations").scrollTop = 0;
+      document.getElementById("iteminfoCombinations").appendChild(infocombelm);
+      collectionCounter += 1;
+    }
+    if (collsplit[0] == id || collsplit[1] == id) {
+      if (collsplit[1] == id) {
+        var tempswitch = collsplit[0];
+        collsplit[0] = collsplit[1];
+        collsplit[1] = tempswitch;
+      }
+      let infocombelm = document.createElement("div");
+      infocombelm.className = "iteminfoCombination";
+      var innercomb = '<div class="iteminfoCombinationItem"><div class="iteminfoCombinationImg" onclick="openDict(' + collsplit[0] + ')" style="background-image: url(\'' + spriteDirectory + database.elements[collsplit[0]].stripped +'.png\')"></div><p class="iteminfoCombinationText">' + database.elements[collsplit[0]].name + '</p></div><p class="iteminfoCombinationText">+</p><div class="iteminfoCombinationItem"><div class="iteminfoCombinationImg" onclick="openDict(' + collsplit[1] + ')" style="background-image: url(\'' + spriteDirectory + database.elements[collsplit[1]].stripped + '.png\')"></div><p class="iteminfoCombinationText">' + database.elements[collsplit[1]].name + '</p></div><p class="iteminfoCombinationText">=</p><div class="iteminfoCombinationItem"><div class="iteminfoCombinationImg" onclick="openDict(' + database.recipes[colladd] + ')" style="background-image: url(\'' + spriteDirectory + database.elements[database.recipes[colladd]].stripped + '.png\')"></div><p class="iteminfoCombinationText">' + database.elements[database.recipes[colladd]].name + '</p></div>'
+      consolelog(innercomb)
+      infocombelm.innerHTML = innercomb;
+      document.getElementById("iteminfoPotentials").scrollTop = 0;
+      document.getElementById("iteminfoPotentials").appendChild(infocombelm);
+      potentialCounter += 1;
+    }
+  })
+  document.getElementById("iteminfoCombination").innerText = "Combinations (" + collectionCounter + "/" + database.elements[id].recipes + ")";
+  document.getElementById("iteminfoPotential").innerText = "Potential (" + potentialCounter + "/" + database.elements[id].potential + ")";
+  if (database.elements[id].potential == 0) {
+    document.getElementById("iteminfoPotential").innerText = "Final Item";
+  }
+  let gl = true;
+  if (plays == true) gl = false;
+  openMenu("iteminfo", undefined, gl);
+}
+let openedMenu = [];
+async function openMenu(id, ignorehintg, nosound) {
+  if (openedMenu.length == 0 && id == "dictionary") {
+    document.getElementById("menutitle").innerText = "Collection";
+    document.getElementById("gi_menu").dataset["show"] = "2";
+    document.getElementById("gi_menu").value = "";
+  }
+  if (openedMenu.length == 0 && id == "hint") {
+    document.getElementById("menutitle").innerText = "Hint";
+    document.getElementById("gi_menu").dataset["show"] = "1";
+    if (ignorehintg != true) document.getElementById("gi_menu").value = "";
+  }
+  if (openedMenu.length == 0 && id == "info") {
+    document.getElementById("menutitle").innerText = "Information";
+  }
+  if (openedMenu.length == 0 && id == "iteminfo") {
+    document.getElementById("menutitle").innerText = "Dictionary";
+  }
+  if (openedMenu.length == 0 && id == "settings") {
+    document.getElementById("volume_music").value = musicVolume;
+    document.getElementById("volume_sfx").value = sfxVolume;
+    document.getElementById("volume_ambient").value = ambientVolume;
+    document.getElementById("menutitle").innerText = "Settings";
+  }
+  if (openedMenu.length == 0 && id == "finalitems") {
+    renderFinalItems();
+    document.getElementById("menutitle").innerText = "Final Items";
+  }
+  if (!(nosound != undefined && nosound == true)) playSound("sfx_menuopen");
+
+  openedMenu.push(id);
+  document.getElementById("menubg").dataset["shown"] = openedMenu.length;
+  document.getElementById(id).dataset["shown"] = "1";
+}
+
+function changeVolumeOutput() {
+  musicVolume = parseFloat(document.getElementById("volume_music").value);
+  sfxVolume = parseFloat(document.getElementById("volume_sfx").value);
+  ambientVolume = parseFloat(document.getElementById("volume_ambient").value);
+  saveSettings();
+  document.getElementById("volumetext_music").innerText = (Math.round(musicVolume * 100)) + "%";
+  document.getElementById("volumetext_sfx").innerText = (Math.round(sfxVolume * 100)) + "%";
+  document.getElementById("volumetext_ambient").innerText = (Math.round(ambientVolume * 100)) + "%";
+  soundRender();
+}
+function changeStyle() {
+  gameStyle++;
+  updateStyle();
+  saveSettings();
+}
+
+function exitMenu(ignoreHint, diffsound) {
+  if (openedMenu.length > 0) {
+    if (openedMenu[openedMenu.length - 1] == "hint") {
+      if (hintHistory.length > 1 && ignoreHint != true) {
+        hintHistory.pop();
+        let pophint = hintHistory.pop();
+        openHint(pophint, false)
+        return;
+      }
+    }
+    if (diffsound != true) {
+      playSound("sfx_menuclose");
+    } else {
+      playSound("sfx_menuchange");
+    }
+    popped = openedMenu.pop();
+    document.getElementById("menubg").dataset["shown"] = openedMenu.length;
+    if (openedMenu.length == 0) {
+      delete document.getElementById("menubg").dataset["shown"];
+      document.getElementById("gi_menu").dataset["show"] = "0";
+    }
+    document.getElementById(popped).dataset["shown"] = "0";
+  }
+}
+function gb_hint() {
+  if (hintHistory.length > 0) {
+    openHint(hintHistory.pop());
+    return;
+  }
+  openHint(depths[biasedRandomNumber(8, depths.length - 1)]);
+}
+function gb_info() {
+  openMenu("info");
+}
+function gb_settings() {
+  openMenu("settings");
+}
+function gb_exithint() {
+  document.getElementById("gb_hint").dataset["hint"] = "0";
+  document.getElementById("gb_exithint").dataset["hint"] = "0";
+  hintHistory = [];
+}
+async function openHint(id, ignoreHint) {
+  let noSound = false;
+  document.getElementById("gb_hint").dataset["hint"] = "1";
+  document.getElementById("gb_exithint").dataset["hint"] = "1";
+  if (document.getElementById("hint").dataset['wiggle'] == "1") return;
+  //if (id < 4) return;
+  if (ignoreHint != true) {
+    if (hintHistory.includes(id)) {
+      hintHistory.slice(0, hintHistory.indexOf(id));
+    } else {
+      hintHistory.push(id);
+    }
+  }
+  consolelog(id, database.elements[id].name);
+  if (openedMenu.includes("hint")) {
+    noSound = true;
+    exitMenu(true, true)
+    document.getElementById("hint").dataset['wiggle'] = "1";
+  } 
+    
+  document.getElementById("hintItem").style.backgroundImage = "url('" + spriteDirectory + database.elements[id].stripped + ".png')";
+  document.getElementById("hintDisclaimer").innerText = database.elements[id].name;
+  document.getElementById("hintDescription").innerText = database.elements[id].description;
+  let collsplit = database.elements[id].discovered;
+  if (collsplit.length == 1) collsplit.push(collsplit[0]);
+  var recipeArray = [];
+  var recipeKeys = Object.keys(database.recipes);
+  recipeKeys.forEach(recipeCheck => {
+    if (database.recipes[recipeCheck] == id) {
+      let collsplit2 = recipeCheck.split(".").map(Number);
+      recipeArray.push({recipe: collsplit2, depth: database.elements[collsplit2[0]].depth + database.elements[collsplit2[1]].depth})
+    }
+  })
+  recipeArray = recipeArray.sort((a, b) => a.depth - b.depth);
+  if (recipeArray.length == 1) {
+    document.getElementById("hintPossible").innerText = "Possible Combination"
+  } else {
+    document.getElementById("hintPossible").innerText = "Possible Combinations"
+  }
+  if (id < 4) {
+    document.getElementById("hintPossible").innerText = "Basic Element."
+    document.getElementById("hintComb").innerHTML = "";
+  } else {
+    document.getElementById("hintComb").innerHTML = "";
+    for (let irg = 0; irg < Math.min(recipeArray.length, 3); irg++) {
+      collsplit = recipeArray[irg].recipe;
+      consolelog(collsplit)
+      let infocombelm = document.createElement("div");
+      infocombelm.className = "iteminfoCombination";
+      consolelog(database.elements[recipeArray[0]]);
+      var innercomb = '<div class="iteminfoCombinationItem"><div class="iteminfoCombinationImg" onclick="openHint(' + collsplit[0] + ')" style="background-image: url(\'' + spriteDirectory + database.elements[collsplit[0]].stripped +'.png\')"></div><p class="iteminfoCombinationText">' + database.elements[collsplit[0]].name + '</p></div><p class="iteminfoCombinationText">+</p><div class="iteminfoCombinationItem"><div class="iteminfoCombinationImg" onclick="openHint(' + collsplit[1] + ')" style="background-image: url(\'' + spriteDirectory + database.elements[collsplit[1]].stripped + '.png\')"></div><p class="iteminfoCombinationText">' + database.elements[collsplit[1]].name + '</p></div><p class="iteminfoCombinationText">=</p><div class="iteminfoCombinationItem"><div class="iteminfoCombinationImg" style="background-image: url(\'' + spriteDirectory + database.elements[id].stripped + '.png\')"></div><p class="iteminfoCombinationText">' + database.elements[id].name + '</p></div>'
+      consolelog(innercomb)
+      infocombelm.innerHTML = innercomb;
+      document.getElementById("hintComb").scrollTop = 0;
+      document.getElementById("hintComb").appendChild(infocombelm);
+    }
+  }
+  openMenu("hint", ignoreHint, noSound);
+  await sleep(50)
+  document.getElementById("hint").dataset['wiggle'] = "0";
+}
+function biasedRandomNumber(power, max) {
+  const rand = Math.random();
+  return Math.floor(Math.pow(rand, power) * max);
+}
+
+
+function jaroDistance(s1, s2) {
+  if (s1 === s2) return 1.0;
+
+  let len1 = s1.length, len2 = s2.length;
+  let maxDist = Math.floor(Math.max(len1, len2) / 2) - 1;
+  let match = 0;
+  let hashS1 = new Array(s1.length).fill(0);
+  let hashS2 = new Array(s2.length).fill(0);
+
+  for (let i = 0; i < len1; i++) {
+    for (let j = Math.max(0, i - maxDist); j < Math.min(len2, i + maxDist + 1); j++) {
+      if (s1[i] === s2[j] && hashS2[j] === 0) {
+        hashS1[i] = 1;
+        hashS2[j] = 1;
+        match++;
         break;
       }
-      
-      pl = pl.slice(1,pl.length);
-      if (ic % 500 == 0) {
-        await sleep(1);
-      }
-      if (ic > 80000) {
-        break;
+    }
+  }
+
+  if (match === 0) return 0.0;
+
+  let t = 0;
+  let point = 0;
+
+  for (let i = 0; i < len1; i++) {
+    if (hashS1[i] === 1) {
+      while (hashS2[point] === 0) point++;
+      if (s1[i] !== s2[point++]) t++;
+    }
+  }
+
+  t /= 2;
+  return ((match) / (len1) + (match) / (len2) + (match - t) / (match)) / 3.0;
+}
+
+function jaroWinkler(s1, s2) {
+  let jaroDist = jaroDistance(s1, s2);
+
+  if (jaroDist > 0.7) {
+    let prefix = 0;
+
+    for (let i = 0; i < Math.min(s1.length, s2.length); i++) {
+      if (s1[i] === s2[i]) prefix++;
+      else break;
+    }
+
+    prefix = Math.min(4, prefix);
+    jaroDist += 0.1 * prefix * (1 - jaroDist);
+  }
+
+  return jaroDist;
+}
+
+
+function redirectVideo() {
+  window.open('https://www.youtube.com/watch?v=dQw4w9WgXcQ');
+}
+
+
+
+var musicStructure = [];
+var structurePaths = [];
+
+async function startMusic() {
+  console.log('started music');
+  //var compressor = Howler.ctx.createDynamicsCompressor();
+  //Howler.masterGain.disconnect(Howler.ctx.destination);
+  //Howler.masterGain.connect(compressor);
+  //compressor.connect(Howler.ctx.destination);
+  structurePaths.push({structure: "intro"})
+  renderAudioFiles();
+  musicUpdate();
+  setInterval(musicUpdate, 38400);
+}
+function musicUpdate() {
+  audioClones = audioClones.filter(word => word.sound.playing);
+  if (structurePaths.length == 0) {
+    continueMusicStructure(sp);
+    renderAudioFiles();
+  }
+  sp = structurePaths.shift();
+  var group = new Pizzicato.Group();
+  var gainNode = Pizzicato.context.createGain();
+  var audioNode = Object.getPrototypeOf(Object.getPrototypeOf(gainNode));
+  var connect = audioNode.connect;
+  audioNode.connect = function(node) {
+    var endpoint = Pz.Util.isEffect(node) ? node.inputNode : node;
+    connect.call(this, endpoint);
+    return node;
+  };
+  for (const spat of sp.paths) {
+    let cloningGet = soundDictionary[spat].clone();
+    audioClones.push({sound: cloningGet, name: spat});
+    group.addSound(cloningGet);
+  }
+  var compressor = new Pizzicato.Effects.Compressor({
+    threshold: -20,
+    knee: 22,
+    attack: 0.05,
+    release: 0.05,
+    ratio: 18,
+    mix: 0.5
+  });
+
+  group.addEffect(compressor);
+  group.play();
+}
+
+function continueMusicStructure(prev) {
+  var random = Math.random() * 100;
+  if (prev == "buildup") {
+    structurePaths.push({structure: "normal"},{structure: "normal"});
+  } else if (random > 50) {
+      structurePaths.push({structure: "normal"},{structure: "normal"});
+    } else {
+      if (random < 33) {
+        structurePaths.push({structure: "ambient"},{structure: "ambient"});
+      } else {
+        structurePaths.push({structure: "ambient"},{structure: "ambient"},{structure: "ambient"},{structure: "ambient"});
       }
     }
-    
-      if (actioncounter > 0) {
-        undoactioncount.push(actioncounter);
-        redoactioncount = [];
-        actioncounter = 0;
-      }
-    
-    function check(xc, yc) {
-      var ts = context.getImageData(xc, yc, 1, 1).data;
-      if (Math.abs(p[0] - ts[0]) < 10 && Math.abs(p[1] - ts[1]) < 10 && Math.abs(p[2] - ts[2]) < 10) {
-        if(!epl.includes(xc + "_" + yc) ) {
-          if (xc < 402 && xc > -2 && yc < 402 && yc > -2) {
-            pl.push(initpos(xc, yc));
-            epl.push(xc + "_" + yc);
+}
+function getMusicFactors() {
+  let totalBasics = [0.25,0.25,0.25,0.25];
+  let depthtotal = 0;
+  let amttotal = 0;
+  let apiLink = 'https://quickchart.io/chart/render/zm-8be3d8f4-383a-4076-9a12-7f1f811024ef?data1=';
+  let gameElms = document.getElementsByClassName("gameelement");
+  for (const gameElm of gameElms) {
+    if (gameElm.dataset['id'] != undefined && gameElm.dataset['small'] == "0") {
+      var iterator = [parseInt(gameElm.dataset['id'])];
+      depthtotal += database.elements[iterator[0]].depth;
+      amttotal += 1;
+      for (let iteratorindex = 0; iteratorindex < 500; iteratorindex++)  {
+        let shiftget = iterator.shift();
+        if (shiftget < 4) {
+          totalBasics[shiftget] += 1;
+          continue;
+        }
+        for (const checkColl of collection) {
+          if (database.recipes[checkColl] == shiftget) {
+            iterator.push(parseInt(checkColl.split('.')[0]))
+            iterator.push(parseInt(checkColl.split('.')[1]))
+            break;
           }
         }
-      }
-    } 
-    
-    //while(true) {
-      
-    //}
-  }
-}
-
-var undoing = false;
-
-async function undo() {
-  if (!undoing) {
-    if (undoactioncount.length > 0) {
-      var reps = undoactioncount.pop();
-      redoactioncount.push(reps);
-      undoing = true;
-      for(let ie = 0; ie < reps; ie++) {
-        context.undo(); 
-        if (ie % 50 == 0) {
-          await sleep(1);
+        if (iterator.length == 0) {
+          break;
         }
       }
-      undoing = false;
     }
   }
-}
-async function redo() {
-  if (!undoing) {
-    if (redoactioncount.length > 0) {
-      var reps = redoactioncount.pop();
-      undoactioncount.push(reps);
-      undoing = true;
-      for(let ie = 0; ie < reps; ie++) {
-        context.redo(); 
-        if (ie % 50 == 0) {
-          await sleep(1);
-        }
-      }
-      undoing = false;
-    }
-  }
-}
-
-function clearR() {
-  context.clearRect(0,0,400,400);
-  undoactioncount.push(1);
-}
-
-
-function roundPos(rp) {
-    return {
-      x: Math.floor(rp.x),
-      y: Math.floor(rp.y)
-    };
-  
-}
-
-function initpos(xx,yy)  {
-    return {
-      x: xx,
-      y: yy
-    };
-}
-function getPixel(tx, ty) {
-  var ts = context.getImageData(tx, ty, 1, 1).data;
-  return ts;
-}
-
-function rgbToHex(r, g, b) {
-    if (r > 255 || g > 255 || b > 255)
-        throw "Invalid color component";
-    return ((r << 16) | (g << 8) | b).toString(16);
-}
-
-function customcolorchange(elemt) {
-  canvascolor = elemt.value;
-}
-
-
-function picktype(elemt) {
-  var getElls = document.getElementsByClassName("typepick");
-  for (let ie = 0; ie < getElls.length; ie++) {
-    if (getElls[ie] == elemt) {
-      getElls[ie].style.backgroundColor = "#8CC5FF";
-    } else {
-      getElls[ie].style.backgroundColor = "#FFFFFF";
-    }
-  }
-  canvastype = parseInt(elemt.getAttribute("data-type"));
-}
-
-
-
-//LZW comp
-
-var LZW = {
-    compress: function (uncompressed) {
-        "use strict";
-        // Build the dictionary.
-        var i,
-            dictionary = {},
-            c,
-            wc,
-            w = "",
-            result = [],
-            dictSize = 256;
-        for (i = 0; i < 256; i += 1) {
-            dictionary[String.fromCharCode(i)] = i;
-        }
- 
-        for (i = 0; i < uncompressed.length; i += 1) {
-            c = uncompressed.charAt(i);
-            wc = w + c;
-            //Do not use dictionary[wc] because javascript arrays 
-            //will return values for array['pop'], array['push'] etc
-           // if (dictionary[wc]) {
-            if (dictionary.hasOwnProperty(wc)) {
-                w = wc;
-            } else {
-                result.push(dictionary[w]);
-                // Add wc to the dictionary.
-                dictionary[wc] = dictSize++;
-                w = String(c);
-            }
-        }
- 
-        // Output the code for w.
-        if (w !== "") {
-            result.push(dictionary[w]);
-        }
-        return result;
-    },
- 
- 
-    decompress: function (compressed) {
-        "use strict";
-        // Build the dictionary.
-        var i,
-            dictionary = [],
-            w,
-            result,
-            k,
-            entry = "",
-            dictSize = 256;
-        for (i = 0; i < 256; i += 1) {
-            dictionary[i] = String.fromCharCode(i);
-        }
- 
-        w = String.fromCharCode(compressed[0]);
-        result = w;
-        for (i = 1; i < compressed.length; i += 1) {
-            k = compressed[i];
-            if (dictionary[k]) {
-                entry = dictionary[k];
-            } else {
-                if (k === dictSize) {
-                    entry = w + w.charAt(0);
-                } else {
-                    return null;
-                }
-            }
- 
-            result += entry;
- 
-            // Add w+entry[0] to the dictionary.
-            dictionary[dictSize++] = w + entry.charAt(0);
- 
-            w = entry;
-        }
-        return result;
-    }
-}
-
-//no more canvas shit
-
-
-var clearingboard = false;
-var sidebar;
-
-async function clearboard() {
-  var getElls = document.getElementsByClassName("element");
-  if (!clearingboard) {
-    clearingboard = true;
-    var lengthOld = getElls.length;
-      for (var id = 0; id < lengthOld; id += 1) {
-        getElls[0].remove();
-      }
-  }
-}
-
-async function challenge() {
-  var challengecomps = [];
-  for(var i = 0; i < fulljson.length; i += 1) {
-    if (!checkCollection(i + 1)) {
-      
-      challengecomps.push(i);
-    }
-  }
-  
-  if (challengecomps.length == 0) {
-    alert("Error: You have found all of the items!");
+  totalBasicsNew = [totalBasics[0], totalBasics[1] / 1.2782, totalBasics[2] / 0.5141, totalBasics[3] / 0.7107];
+  let maxg = Math.max(Math.max(totalBasicsNew[0], totalBasicsNew[1]),Math.max(totalBasicsNew[2], totalBasicsNew[3]))
+  if (amttotal == 0) {
+    totalBasicsNew = [1,1,1,1];
   } else {
-    var ci = Math.round((Math.random() * challengecomps.length));
-    var fj = fulljson[challengecomps[ci]];
-    console.log(fj);
-    console.log(fj.recipe[1]);
-    alert("Try Finding " + fj.name + "!\nHint Ingredient: " + fulljson[fj.recipe[1] - 1].name);
+    totalBasicsNew = [Math.round(totalBasicsNew[0] / maxg * 1000) / 1000, Math.round(totalBasicsNew[1] / maxg * 1000) / 1000, Math.round(totalBasicsNew[2] / maxg * 1000) / 1000, Math.round(totalBasicsNew[3] / maxg * 1000) / 1000]
   }
-  
+  let sum = totalBasicsNew.reduce((partialSum, a) => partialSum + a, 0);
+  totalBasicsNew = [totalBasicsNew[0] / sum,totalBasicsNew[1] / sum,totalBasicsNew[2] / sum,totalBasicsNew[3] / sum];
+  return {elms: totalBasicsNew, depth: depthtotal, amount: amttotal};
+}
+function getTotalFactors() {
+  let totalBasics = [0,0,0,0];
+  let apiLink = 'https://quickchart.io/chart/render/zm-8be3d8f4-383a-4076-9a12-7f1f811024ef?data1=';
+  let gameElms = document.getElementsByClassName("gameelement");
+  let recipeobjects = Object.values(database.recipes);
+  let recipeobjectsk = Object.keys(database.recipes);
+  for (let index = 0; index < database.elements.length; index++) {
+    console.log(index)
+    if (true) {
+      var iterator = [index]
+      for (let iteratorindex = 0; iteratorindex < 50000; iteratorindex++)  {
+        let shiftget = iterator.shift();
+        if (shiftget < 4) {
+          totalBasics[shiftget] += 1;
+          //console.log("added to " + shiftget);
+          if (iterator.length == 0) {
+            break;
+          }
+          continue;
+        }
+        //console.log(shiftget, recipeobjects);
+        let checkColl = recipeobjectsk[recipeobjects.indexOf(shiftget)].split('.');
+        iterator.push(parseInt(checkColl[0]))
+        iterator.push(parseInt(checkColl[1]))
+        if (iterator.length == 0) {
+          break;
+        }
+      }
+    }
+  }
+  totalBasicsNew = [totalBasics[0], totalBasics[1] / 1.2782, totalBasics[2] / 0.5141, totalBasics[3] / 0.7107];
+  let maxg = Math.max(Math.max(totalBasicsNew[0], totalBasicsNew[1]),Math.max(totalBasicsNew[2], totalBasicsNew[3]))
+  totalBasicsNew = [Math.round(totalBasicsNew[0] / maxg * 100), Math.round(totalBasicsNew[1] / maxg * 100), Math.round(totalBasicsNew[2] / maxg * 100), Math.round(totalBasicsNew[3] / maxg * 100)]
+  console.log(totalBasicsNew);
+  console.log(apiLink + totalBasicsNew.join(','));
+}
+function renderAudioFiles() {
+  let randombgcoll = ["bg_thunderandrain", "bg_windandbirds", "bg_windandrain", "bg_windandthunder"];
+  structurePathsNew = [];
+/*element paths - water, earth, fire, air
+  Water - harmonics
+  Earth - percussion
+  Fire - melody
+  Air - ear candy, twinkles, little small bell melodies, chimes   */
+
+  structurePaths.forEach(structureelmd => {
+    let musicFactors = getMusicFactors();
+    let musicFactorsSave = [...musicFactors.elms];
+    let randombgadd = randombgcoll[randomint(0, 3)];
+    let elementPaths = [
+      [...elmPaths[0]],
+      [...elmPaths[1]],
+      [...elmPaths[2]],
+      [...elmPaths[3]]
+    ];
+    
+
+    let complexity = Math.min(Math.round(Math.pow(Math.floor(musicFactors.amount / 1.5), 0.7) + 1),9)
+    if (Math.random() > 0.9) {complexity += 1;} else if (Math.random() > 0.6 && complexity > 1) {complexity -= 1;}
+    let structureelm = structureelmd['structure'];
+    if (structureelmd['paths'] == undefined) {
+      let paths = [];
+      if (structureelm == "intro") {
+        paths.push("structure_intro")
+      }
+      if (structureelm == "introbuildup") {
+        paths.push("arp_plucks", "percussion_chill")
+      } 
+      if (structureelm == "normal" || structureelm == "ambient") {
+        let elementPaths = [
+          [...elmPaths[0]],
+          [...elmPaths[1]],
+          [...elmPaths[2]],
+          [...elmPaths[3]]
+        ];
+        let randomnumset = ["structure_water", "structure_earth", "structure_fire", "structure_air"][musicFactorsSave.indexOf(Math.max(...musicFactorsSave))];
+        paths.push(randomnumset);
+        paths.push(randombgadd) 
+        //if (Math.random() > 0.15) paths.push(randombgcoll[randomint(0, 3)]) 
+        for (let icpa = 0; icpa < complexity; icpa++) {
+          if (elementPaths.flat().length == 0) break;
+          let randomGet = Math.random();
+          let indelm = 0;
+          console.log(musicFactors.elms);
+          if (randomGet >= musicFactors.elms[0]+musicFactors.elms[1]+musicFactors.elms[2] ) {  // Water
+            indelm = 3;
+          } else if (randomGet >= musicFactors.elms[0]+musicFactors.elms[1]) {  // Earth
+            indelm = 2;
+          } else if (randomGet >= musicFactors.elms[0]) {  // Fire
+            indelm = 1;
+          }
+          let ind = randomint(0, elementPaths[indelm].length - 1);
+          let indget = elementPaths[indelm][ind];
+          elementPaths[indelm].splice(ind, 1);
+          if (elementPaths[indelm].length == 0) {
+            musicFactors.elms[indelm] = 0;
+          }
+          console.log(icpa, elementPaths, indget, indelm);
+          let sum = musicFactors.elms[0] + musicFactors.elms[1] + musicFactors.elms[2] + musicFactors.elms[3]
+          musicFactors.elms = [musicFactors.elms[0] / sum,musicFactors.elms[1] / sum,musicFactors.elms[2] / sum,musicFactors.elms[3] / sum];
+          paths.push(indget)
+        }
+      }
+      structurePathsNew.push({structure: structureelm, paths: paths});
+    } else {
+      structurePathsNew.push(structureelmd);
+    }
+  })
+  structurePaths = structurePathsNew;
+}
+function randomint(min, max) {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(Math.random() * (max- min + 1) + min);
+}
+
+
+async function playSound(path, delay) {
+  console.log(path,delay);
+  if (delay != undefined) {
+    await sleep(delay);
+  }
+  soundDictionary[path].clone().play();
 }
