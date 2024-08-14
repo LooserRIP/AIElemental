@@ -242,7 +242,7 @@ async function preload() {
   function loadSound(url) {
     return new Promise(async (resolve) => {
       console.log("loading " + url);
-      const sound = await new Pizzicato.Sound({ source: 'file', options: { path: 'https://raw.githubusercontent.com/LooserRIP/AIElemental/tree/main/sitefiles/sounds/' + url + ".mp3" } }, () => {
+      const sound = await new Pizzicato.Sound({ source: 'file', options: { path: 'https://github.com/LooserRIP/AIElemental/raw/main/sitefiles/sounds/' + url + ".mp3" } }, () => {
         soundDictionary[url] = sound;
         console.log("loaded " + url);
         //document.getElementById("loadingtitle").innerText = "Loading... (" + loadCount + "/35)";
