@@ -14,10 +14,10 @@ let currentlyDragging = null;
 let dragOffset = {x: 0, y: 0}
 let bringBackSidebar = null;
 let currentlyHovering = null;
-let combineCircle = null;
+let combineCircle = null; 
 let currentlyDraggingCounter = 0;
 let hintHistory = [];
-let spriteDirectory = "https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/";
+let spriteDirectory = "https://raw.githubusercontent.com/LooserRIP/AIElemental/refs/heads/gh-pages/cdn/IconsStyle/";
 let elmPaths = [
   ["water_bass", "water_chillbeat", "water_flowerpad", "water_groovebeat", "water_heaven", "water_mysticbass"],    // Water
   ["earth_chillbeat", "earth_distortedmysticbass", "earth_groovebeat"],    // Earth
@@ -187,7 +187,7 @@ function updateStyle() {
   if (gameStyle >= styleNames.length) gameStyle = 0;
   document.getElementById("stylesetting").innerText = "Style: " + styleNames[gameStyle];
   if (gameStyle == 0) {
-    spriteDirectory = "https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/cdn/IconsStyle/";
+    spriteDirectory = "https://raw.githubusercontent.com/LooserRIP/AIElemental/refs/heads/gh-pages/cdn/IconsStyle/";
   }
   if (gameStyle == 1) {
     spriteDirectory = 'https://raw.githubusercontent.com/LooserRIP/AIElemental-EnvStyle/main/EnvStyle/';
@@ -201,15 +201,13 @@ function updateStyle() {
 }
 async function preload() {
   const soundPaths = elmPaths.flat();
-  const jsonURL = 'https://raw.githubusercontent.com/LooserRIP/AIElemental/gh-pages/database.json';
+  const jsonURL = 'https://raw.githubusercontent.com/LooserRIP/AIElemental/refs/heads/gh-pages/database.json';
   
   let loadCount = 0;
-  let totalResources = soundPaths.length + 1; // Add 1 for the JSON file
+  let totalResources = soundPaths.length + 1;
   const soundPathsCombined = soundPaths.concat(additionalAudioLoads);
   //const sound = new Pizzicato.Sound({ source: 'file', options: { path: 'https://raw.githubusercontent.com/LooserRIP/LooserRIP.github.io/master/sitefiles/sounds/' + path + ".mp3" } }, () => {
 
-  
-  // Load all resources using Promise.all
   
   await loadJSON(jsonURL);
   const _soundPromises = sfxPaths.map(loadSound);
@@ -222,10 +220,7 @@ async function preload() {
   const soundPromises = soundPathsCombined.map(loadSound);
   const soundsg = await Promise.all(soundPromises);
   console.log("finished loading");
-  // Now, all sounds and JSON data are loaded, and you can use them in your application
   console.log('All resources loaded');
-  
-  // Use the spread operator to log all loaded sounds
   console.log('All sounds loaded');
   audioLoaded = true;
   soundRender();
@@ -242,7 +237,7 @@ async function preload() {
   function loadSound(url) {
     return new Promise(async (resolve) => {
       console.log("loading " + url);
-      const sound = await new Pizzicato.Sound({ source: 'file', options: { path: 'https://github.com/LooserRIP/AIElemental/raw/main/sitefiles/sounds/' + url + ".mp3" } }, () => {
+      const sound = await new Pizzicato.Sound({ source: 'file', options: { path: 'https://raw.githubusercontent.com/LooserRIP/AIElemental/refs/heads/main/sitefiles/sounds/' + url + ".mp3" } }, () => {
         soundDictionary[url] = sound;
         console.log("loaded " + url);
         //document.getElementById("loadingtitle").innerText = "Loading... (" + loadCount + "/35)";
